@@ -9,4 +9,4 @@ navigate these connections.  For now, you can:
 * Look at [OEIS entries of interest](doc/oeis.md)
 * Browse the [source code](src/)
 
-You can also have a look at Jason Reed's [lambda-maps repository](https://github.com/jcreedcmu/lambda-maps)
+You can also have a look at Jason Reed's [lambda-maps repository](https://github.com/jcreedcmu/lambda-maps).
