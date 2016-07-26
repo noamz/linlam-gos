@@ -14,3 +14,5 @@ Sequences associated with natural families of linear lambda terms (and natural f
 Other sequences of interest:
 
 * [A220910](https://oeis.org/A220910): neutral planar terms with one free variable
+* [A001147](https://oeis.org/A001147): neutral linear terms / free exchange with one free variable
+
