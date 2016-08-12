@@ -10,11 +10,11 @@ theory of graphs on surfaces.  Besides browsing the
 
 Some quick explanations of terminology:
 
-* A lambda term is ''linear'' if every variable is used exactly once.
-* A lambda term is ''normal'' if it contains no $\beta$-redices. It is ''neutral'' if it consists of a head variable applied to a sequence of normal terms.
-* A linear term is ''planar'' if the list of free variables as the term is traversed grows like a stack, with lambda abstraction as "push" and variables as "pop". This actually gives rise to two different notions of planarity, depending on whether applications are traversed left-to-right (e.g., $\lambda x.\lambda y.y(x)$ is LR-planar) or right-to-left (e.g., $\lambda x.\lambda y.x(y)$ is RL-planar).
-* A linear term is ''indecomposable'' if it contains no closed proper subterms.
-* Two normal linear terms are said to be equivalent modulo ''free exchange'' if one can be obtained from the other by a sequence of permutations of adjacent lambda abstractions.
+* A lambda term is __linear__ if every variable is used exactly once.
+* A lambda term is __normal__ if it contains no $\beta$-redices. It is __neutral__ if it consists of a head variable applied to a sequence of normal terms.
+* A linear term is __planar__ if the list of free variables as the term is traversed grows like a stack, with lambda abstraction as "push" and variables as "pop". This actually gives rise to two different notions of planarity, depending on whether applications are traversed left-to-right (e.g., $\lambda x.\lambda y.y(x)$ is LR-planar) or right-to-left (e.g., $\lambda x.\lambda y.x(y)$ is RL-planar).
+* A linear term is __indecomposable__ if it contains no closed proper subterms.
+* Two normal linear terms are said to be equivalent modulo __free exchange__ if one can be obtained from the other by a sequence of permutations of adjacent lambda abstractions.
 
 Some other resources:
 
