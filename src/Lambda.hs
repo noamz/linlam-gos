@@ -408,6 +408,12 @@ infer (S_R b) k =
 synth :: ULT -> ([Int],Type,TCtx,[(Type,Type)])
 synth t = runIW (infer (leastRed t) (\a g xi -> IW (\n -> ([0..n-1],a,g,xi)))) 0
 
+synthClosedNormal :: ULT -> Type
+synthClosedNormal t =
+  if freevars t /= [] then error "synthClosedNormal: not closed"
+  else if not (isNormal t) then error "synthClosedNormal: not normal"
+  else let (_,r,_,_) = synth t in r
+
 synthHorn :: ULT -> ([Int],Type,TCtx,[(Type,Type)])
 synthHorn t = runIW (infer (hornRed t) (\a g xi -> IW (\n -> ([0..n-1],a,g,xi)))) 0
 
