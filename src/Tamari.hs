@@ -1,17 +1,7 @@
 module Tamari where
 
 import Data.List
-
-data Catalan = L | B Catalan Catalan
-  deriving (Show,Eq)
-
-size :: Catalan -> Int
-size L = 0
-size (B t1 t2) = 1 + size t1 + size t2
-
-catalan :: Int -> [Catalan]
-catalan 0 = [L]
-catalan n = [B t1 t2 | i <- [0..n-1], t1 <- catalan i, t2 <- catalan (n-1-i)]
+import Catalan
 
 rotR1 :: Catalan -> [Catalan]
 rotR1 (B (t1 @ (B t11 t12)) t2) =
