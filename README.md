@@ -1,12 +1,13 @@
 # Linear lambda calculus and graphs on surfaces
 
-It turns out that linear lambda calculus has some surprising
-connections to the theory of graphs on surfaces (for background, check
-out these [bibliographic references](doc/refs.md)).  The purpose of
-this repository is to gather some data and code for helping to
-navigate these connections.  For now, you can:
+This repository gathers some code and data for exploring the
+combinatorics of linear lambda calculus and its connections to the
+theory of graphs on surfaces.  Besides browsing the
+[source code](src/), you can also:
 
-* Look at [OEIS entries of interest](doc/oeis.md)
-* Browse the [source code](src/)
+* Look at [related OEIS entries](doc/oeis.md)
+* See [bibliographic references](doc/refs.md)
 
-You can also have a look at Jason Reed's [lambda-maps repository](https://github.com/jcreedcmu/lambda-maps).
+Some other resources:
+
+* Jason Reed's [lambda-maps repository](https://github.com/jcreedcmu/lambda-maps).
