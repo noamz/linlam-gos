@@ -8,7 +8,7 @@ theory of graphs on surfaces.  Besides browsing the
 * Look at [related OEIS entries](doc/oeis.md)
 * See [bibliographic references](doc/refs.md)
 
-Some quick explanations of __terminology__:
+Some quick explanations of _terminology_:
 
 * A lambda term is __linear__ if every variable is used exactly once.
 * A lambda term is __normal__ if it contains no $\beta$-redices. It is __neutral__ if it consists of a head variable applied to a sequence of normal terms.
