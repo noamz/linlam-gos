@@ -18,3 +18,7 @@ dyck2cat_cps x [] k = error "not a dyck word"
 
 dyck2cat :: Eq a => [a] -> Catalan
 dyck2cat (x:xs) = dyck2cat_cps x xs (\w' t -> if w' == [] then t else error "not a closed dyck word")
+
+dycks2cat :: Eq a => [a] -> Catalan
+dycks2cat [] = L
+dycks2cat (x:xs) = dyck2cat_cps x xs (\w' t -> B t (dycks2cat w'))
