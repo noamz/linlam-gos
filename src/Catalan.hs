@@ -3,9 +3,13 @@ module Catalan where
 data Catalan = L | B Catalan Catalan
   deriving (Show,Eq)
 
-size :: Catalan -> Int
-size L = 0
-size (B t1 t2) = 1 + size t1 + size t2
+nodes :: Catalan -> Int
+nodes L = 0
+nodes (B t1 t2) = 1 + nodes t1 + nodes t2
+
+leaves :: Catalan -> Int
+leaves L = 1
+leaves (B t1 t2) = leaves t1 + leaves t2
 
 catalan :: Int -> [Catalan]
 catalan 0 = [L]
