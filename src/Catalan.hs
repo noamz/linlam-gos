@@ -26,3 +26,13 @@ dyck2cat (x:xs) = dyck2cat_cps x xs (\w' t -> if w' == [] then t else error "not
 dycks2cat :: Eq a => [a] -> Catalan
 dycks2cat [] = L
 dycks2cat (x:xs) = dyck2cat_cps x xs (\w' t -> B t (dycks2cat w'))
+
+cat2dyck_st :: Catalan -> Int -> (Int,[Int])
+cat2dyck_st L n = (n,[])
+cat2dyck_st (B t1 t2) n =
+  let (n',w1) = cat2dyck_st t1 (n+1) in
+  let (n'',w2) = cat2dyck_st t2 n' in
+  (n'',n : w1 ++ n : w2)
+
+cat2dyck :: Catalan -> [Int]
+cat2dyck t = let (n,w) = cat2dyck_st t 0 in w
