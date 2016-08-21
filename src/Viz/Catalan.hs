@@ -23,11 +23,11 @@ attach n1 n2 n =
     # connectOutside' (with & arrowHead .~ noHead) n n1
     # connectOutside' (with & arrowHead .~ noHead) n n2)
 
-diagCatTree :: Catalan -> String -> Diagram B
-diagCatTree L k = (circle 0.2 # fc blue & pad 3) # named k
-diagCatTree (B t1 t2) k =
-  let d1 = diagCatTree t1 ('L' : k) in
-  let d2 = diagCatTree t2 ('R' : k) in
+diagCatTree :: String -> Catalan -> Diagram B
+diagCatTree k L = (circle 0.2 # fc blue & pad 3) # named k
+diagCatTree k (B t1 t2) =
+  let d1 = diagCatTree ('L' : k) t1 in
+  let d2 = diagCatTree ('R' : k) t2 in
   let k1 = ('L' : k) in
   let k2 = ('R' : k) in
   withName k1 (\b1 ->
