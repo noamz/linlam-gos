@@ -14,11 +14,11 @@ main =
   let t3 = B L (B (B L L) (B L L)) in
   let d =
         hsep 1 [
-          (diagDyckArcs (cat2dyck t1) === diagCatTree t1 ['1']),
-          bigarrow,
-          (diagDyckArcs (cat2dyck t2) === diagCatTree t2 ['2']),
-          bigarrow,
-          (diagDyckArcs (cat2dyck t3) === diagCatTree t3 ['3'])
+          vsep 1 [diagDyckArcs (cat2dyck t1) # centerX, diagCatTree t1 ['1'] # centerX],
+          vsep 1 [mempty,bigarrow],
+          vsep 1 [diagDyckArcs (cat2dyck t2) # centerX, diagCatTree t2 ['2'] # centerX],
+          vsep 1 [mempty,bigarrow],
+          vsep 1 [diagDyckArcs (cat2dyck t3) # centerX, diagCatTree t3 ['3'] # centerX]
           ]
   in
   mainWith d
