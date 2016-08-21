@@ -12,7 +12,9 @@ import Data.List
 import Util
 import Formulas
 import Bijections
-  
+
+import qualified Catalan as C
+
 -- type of raw linear lambda terms
 data ULT = V Int | A ULT ULT | L Int ULT
   deriving (Eq,Show)
@@ -534,3 +536,11 @@ eraseLambdas :: ULT -> ULT
 eraseLambdas (A t u) = A (eraseLambdas t) (eraseLambdas u)
 eraseLambdas (V x) = (V x)
 eraseLambdas (L x t) = eraseLambdas t
+
+-- compute lambda skeleton, turning lambdas into binary nodes with one
+-- trivial child (right child if flag is false, left child if flag is true)
+lambdaSkel :: Bool -> ULT -> C.Catalan
+lambdaSkel b (V _) = C.L
+lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
+lambdaSkel b (L _ t) = if b then C.B C.L (lambdaSkel b t)
+                       else C.B (lambdaSkel b t) C.L
