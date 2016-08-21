@@ -41,6 +41,9 @@ lams2catRL t = C.dyck2cat (lams2dowRL t)
 type2catLR :: ULT -> C.Catalan
 type2catLR t = C.dycks2cat (linearizeType $ synthClosedNormal t)
 
+type2catRL :: ULT -> C.Catalan
+type2catRL t = C.dyck2cat (linearizePos $ synthClosedNormal t)
+
 -- the number of normal planar indecomposable lambda terms of size n+1 is
 -- equal to the number of intervals in the Tamari lattice T_n.
 
@@ -64,6 +67,20 @@ conj2 :: Int -> Bool
 conj2 n =
   let ts = allnptiRL n in
   let intervals = map (\t -> (lams2catRL t,apps2cat t)) ts in
+  length (nub intervals) == length intervals &&
+  flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
+
+conj3 :: Int -> Bool
+conj3 n =
+  let ts = allnptiLR n in
+  let intervals = map (\t -> (type2catLR t,apps2cat t)) ts in
+  length (nub intervals) == length intervals &&
+  flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
+
+conj4 :: Int -> Bool
+conj4 n =
+  let ts = allnptiRL n in
+  let intervals = map (\t -> (type2catRL t,apps2cat t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 

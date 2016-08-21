@@ -339,6 +339,14 @@ linearizeType :: Type -> [Int]
 linearizeType (TVar x) = [x]
 linearizeType (TFn a b) = linearizeType a ++ linearizeType b
 
+linearizePos :: Type -> [Int]
+linearizePos (TVar x) = [x]
+linearizePos (TFn a b) = linearizePos b ++ linearizeNeg a
+
+linearizeNeg :: Type -> [Int]
+linearizeNeg (TVar x) = [x]
+linearizeNeg (TFn a b) = linearizePos a ++ linearizeNeg b
+
 newtype IntWrapped a = IW { runIW :: Int -> a }
 
 class HasCounter a where
