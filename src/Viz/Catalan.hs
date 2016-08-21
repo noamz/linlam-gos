@@ -3,6 +3,7 @@
 module Viz.Catalan where
 
 import Data.Maybe
+import Data.List
 
 import Diagrams.Prelude
 import Diagrams.Backend.SVG.CmdLine
@@ -40,3 +41,15 @@ diagCatTree (B t1 t2) k =
   attach k1 k2 k (d1 ||| d2)
   # connectOutside' (with & arrowHead .~ noHead) k k1
   # connectOutside' (with & arrowHead .~ noHead) k k2
+
+diagDyckArcs :: [Int] -> Diagram B
+diagDyckArcs w =
+  let pt n = circle 0.2 # fc black # named n in
+  let marked [] seen = []
+      marked (x:xs) seen = if elem x seen then (True,x):marked xs seen else (False,x):marked xs (x:seen) in
+  let w' = marked w [] in
+  let shaft = arc xDir (1/2 @@ turn) in
+  hsep 1 (map pt w') #
+  applyAll [connect' (with & arrowHead .~ noHead & arrowShaft .~ shaft) (True,i) (False,i) | (False,i) <- w']
+
+
