@@ -13,10 +13,10 @@ main =
   let t2 = B L (B (B (B L L) L) L) in
   let t3 = B L (B (B L L) (B L L)) in
   let d =
-        diagTree t1 ['1'] # centerY |||
+        diagCatTree t1 ['1'] # centerY |||
         bigarrow |||
-        diagTree t2 ['2'] # centerY |||
+        diagCatTree t2 ['2'] # centerY |||
         bigarrow |||
-        diagTree t3 ['3'] # centerY
+        diagCatTree t3 ['3'] # centerY
   in
   mainWith d
