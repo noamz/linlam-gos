@@ -15,3 +15,5 @@ To run the tests, for example you could try the following from ghci:
 > n: 3
 > generating svg...
 ```
+
+This will generate a file called "output.svg" which you can then open for example in your web browser.
