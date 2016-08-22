@@ -7,10 +7,6 @@ import Viz.Catalan
 import Catalan
 import Viz.List
 
-bigarrow = arrowAt (0 ^& 0) (2*unitX)
-  
 main =
-  let cat4 = catalan 4 in
-  let d = hsep 1 $ numberedHList $ map (\t -> diagCatTree [] t) cat4
-  in
-  mainWith d
+  mainWith $
+  vsep 1 $ [hsep 3 $ numberedHList [vsep 1 [diagCatTree [] c # scale 2 # centerX, diagDyckArcs (cat2dyck c) # centerX] | c <- catalan n] | n <- [1..4]]
