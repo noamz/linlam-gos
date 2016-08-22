@@ -48,8 +48,8 @@ diagDyckArcs w =
   let marked [] seen = []
       marked (x:xs) seen = if elem x seen then (True,x):marked xs seen else (False,x):marked xs (x:seen) in
   let w' = marked w [] in
-  let shaft = arc xDir (1/2 @@ turn) in
-  hsep 1 (reverse $ map pt w') #
+  let shaft = arc xDir (-1/2 @@ turn) in
+  hsep 1 (map pt w') #
   applyAll [connect' (with & arrowHead .~ noHead & arrowShaft .~ shaft) (False,i) (True,i) | (False,i) <- w']
 
 
