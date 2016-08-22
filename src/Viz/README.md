@@ -3,4 +3,13 @@
 Some visualization routines using the Haskell [diagrams](http://projects.haskell.org/diagrams/) library.
 
 * Catalan.hs: visualizing [Catalan](https://en.wikipedia.org/wiki/Catalan_number) objects as binary trees or as planar arc diagrams.
+* List.hs: basic utilities for lists.
+* Test*.hs: various tests.
 
+To run the tests, for example you could try the following from ghci:
+
+> > :set args -o output.svg -w 4096
+> > :load Viz/TestChapo.hs
+> > main
+> n: 3
+> generating svg...
