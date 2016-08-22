@@ -27,5 +27,5 @@ main = do
   
   let tminterval t = (Ch.lams2dowLR t,Ch.apps2cat t)
   let d = vsep 1 $ labelledVList [(diagCatTree [] c # scale 2,
-                                   hsep 1 $ labelledHList $ zip (map (\t -> vsep 1 [diagDyckArcs (Ch.lams2dowLR t) # centerX, text (Lam.prettyULT t) # centerX ]) ts) (repeat mempty)) | (c,ts) <- byApps'']
+                                   hsep 3 $ labelledHList $ zip (map (\t -> vsep 1 [diagDyckArcs (Ch.lams2dowLR t) # centerX, text (Lam.prettyULT t) # centerX ]) ts) (repeat mempty)) | (c,ts) <- byApps'']
   mainWith (d # frame 1)
