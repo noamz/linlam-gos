@@ -8,8 +8,10 @@ Some visualization routines using the Haskell [diagrams](http://projects.haskell
 
 To run the tests, for example you could try the following from ghci:
 
-> > :set args -o output.svg -w 4096
-> > :load Viz/TestChapo.hs
-> > main
+```
+> :set args -o output.svg -w 4096
+> :load Viz/TestChapo.hs
+> main
 > n: 3
 > generating svg...
+```
