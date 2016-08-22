@@ -16,15 +16,16 @@ import qualified Tamari as T
 
 bigarrow = arrowAt (0 ^& 0) (2*unitX)
   
-main =
-  let npti3 = Ch.allnptiLR 3 in
-  let byApps = equivClassesBy (\t1 t2 -> Ch.apps2cat t1 == Ch.apps2cat t2) npti3 [] in
-  let byApps' = sortBy (comparing length) $ map (sortBy (\t1 t2 -> let (c1,c2) = (Ch.apps2cat t1,Ch.apps2cat t2) in if c1 == c2 then EQ else if T.tamari_order c1 c2 then LT else if T.tamari_order c2 c1 then GT else compare (Lam.prettyULT t1) (Lam.prettyULT t2))) byApps in
-  let byApps'' = map (\ts -> (Ch.apps2cat (head ts),ts)) byApps' in
+main = do
+  putStr "n: "
+  n <- getLine >>= return . read
+  putStrLn "generating svg..."
+  let nptis = Ch.allnptiLR n
+  let byApps = equivClassesBy (\t1 t2 -> Ch.apps2cat t1 == Ch.apps2cat t2) nptis []
+  let byApps' = sortBy (comparing length) $ map (sortBy (\t1 t2 -> let (c1,c2) = (Ch.apps2cat t1,Ch.apps2cat t2) in if c1 == c2 then EQ else if T.tamari_order c1 c2 then LT else if T.tamari_order c2 c1 then GT else compare (Lam.prettyULT t1) (Lam.prettyULT t2))) byApps
+  let byApps'' = map (\ts -> (Ch.apps2cat (head ts),ts)) byApps'
   
-  let tminterval t = (Ch.lams2dowLR t,Ch.apps2cat t) in
-  let intdiag (w,c) = vsep 1 [diagDyckArcs w, diagCatTree [] c] in
-  let d = vsep 1 $ labelledVList [(diagCatTree [] c,
+  let tminterval t = (Ch.lams2dowLR t,Ch.apps2cat t)
+  let d = vsep 1 $ labelledVList [(diagCatTree [] c # scale 2,
                                    hsep 1 $ labelledHList $ zip (map (\t -> vsep 1 [diagDyckArcs (Ch.lams2dowLR t) # centerX, text (Lam.prettyULT t) # centerX ]) ts) (repeat mempty)) | (c,ts) <- byApps'']
-  in
   mainWith (d # frame 1)
