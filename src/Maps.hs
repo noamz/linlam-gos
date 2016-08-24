@@ -43,6 +43,13 @@ eulerOM m =
 passportOM :: OMap -> ([Int],[Int],[Int])
 passportOM m = passport (sigma m,alpha m,phiOM m)
 
+-- compute the underlying abstract graph of an oriented map (ignore dangling edges)
+graphOM :: OMap -> ([Int],[(Int,Int)])
+graphOM m =
+  let vs = map head $ verticesOM m in
+  let vertexOf i = head $ intersect (orbit (act (sigma m)) i) vs in
+  (vs, map (\[i,j] -> (vertexOf i,vertexOf j)) (filter ((==2) . length) $ edgesOM m))
+
 -- map dual = exchange vertices and faces
 dualOM :: OMap -> OMap
 dualOM m = OMap { odarts = odarts m, sigma = comp (inv (sigma m)) (alpha m), alpha = alpha m }
