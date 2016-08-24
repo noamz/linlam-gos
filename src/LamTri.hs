@@ -316,7 +316,7 @@ unroot :: RTM -> TMb
 unroot (m,ds,d0) =
   let d0' = act (M.alpha m) d0 in
   (M.OMap { M.odarts = delete d0 (M.odarts m),
-            M.sigma = M.sigma m,
+            M.sigma = M.sigma m \\ [(d0,d0)],
             M.alpha = [(d0',d0')] ++ [(i,act (M.alpha m) i) | i <- M.odarts m \\ [d0,d0']] },
    d0':ds)
 
@@ -328,7 +328,7 @@ deroot (m,[],d0) =
   let d2 = act (M.sigma m) d1 in
   let (d1',d2') = (act (M.alpha m) d1, act (M.alpha m) d2) in
   M.OMap { M.odarts = M.odarts m \\ [d0,d0',d1,d2],
-           M.sigma = M.sigma m,
+           M.sigma = [(i,j) | (i,j) <- M.sigma m, not $ elem i [d0,d0',d1,d2]],
            M.alpha = perm2 d1' d2' ++ [(i,act (M.alpha m) i) | i <- M.odarts m \\ [d0,d0',d1,d2,d1',d2']] }
 deroot (m,_,d0) = error "cannot deroot map with boundary"
 
