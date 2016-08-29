@@ -9,4 +9,4 @@ import Viz.List
 
 main =
   mainWith $
-  vsep 1 $ [hsep 3 $ numberedHList [vsep 1 [diagCatTree [] c # scale 2 # centerX, diagDyckArcs (cat2dyck c) # centerX] | c <- catalan n] | n <- [1..4]]
+  vsep 1 $ [hsep 3 $ numberedHList [vsep 1 [diagCatTree c # scale 2 # centerX, diagDyckArcs (cat2dyck c) # centerX] | c <- catalan n] | n <- [1..4]]
