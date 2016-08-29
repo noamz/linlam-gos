@@ -24,9 +24,6 @@ tamari_down t = t : foldr union [] [tamari_down t' | t' <- rotL1 t]
 tamari_order :: Catalan -> Catalan -> Bool
 tamari_order t1 t2 = elem t2 (tamari_up t1)
 
-tamari_compare :: Catalan -> Catalan -> Ordering
-tamari_compare t1 t2 = if t1 == t2 then EQ else if tamari_order t1 t2 then LT else GT
-
 kreweras_order :: Catalan -> Catalan -> Bool
 kreweras_order L L = True
 kreweras_order (B t1 t2) (B t1' t2') =
