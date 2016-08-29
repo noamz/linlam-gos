@@ -546,7 +546,7 @@ eraseLambdas (V x) = (V x)
 eraseLambdas (L x t) = eraseLambdas t
 
 -- compute lambda skeleton, turning lambdas into binary nodes with one
--- trivial child (right child if flag is false, left child if flag is true)
+-- trivial child (the right child if b is false, left child otherwise)
 lambdaSkel :: Bool -> ULT -> C.Catalan
 lambdaSkel b (V _) = C.L
 lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
