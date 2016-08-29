@@ -29,6 +29,10 @@ lams2dowRL (L x t) = x : lams2dowRL t
 lams2dowRL (A t1 t2) = lams2dowRL t2 ++ lams2dowRL t1
 lams2dowRL (V x) = [x]
 
+lams2dow :: Bool -> ULT -> [Int]
+lams2dow True t = lams2dowLR t
+lams2dow False t = lams2dowRL t
+
 lams2catLR :: ULT -> C.Catalan
 lams2catLR t = C.dyck2cat (lams2dowLR t)
 
@@ -52,6 +56,10 @@ allnptiRL n = filter isIndecomposable $ allcNPT False (n+1)
 
 allnptiLR :: Int -> [ULT]
 allnptiLR n = filter isIndecomposable $ allcNPT True (n+1)
+
+allnpti :: Bool -> Int -> [ULT]
+allnpti True n = allnptiLR n
+allnpti False n = allnptiRL n
 
 -- a simple conjecture about extracting the interval of the Tamari lattice
 -- corresponding to a normal planar indecomposable lambda term
