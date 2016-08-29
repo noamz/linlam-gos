@@ -60,6 +60,7 @@ lamTree k False (L.L x t) =
 diagULT :: Bool -> L.ULT -> Diagram B
 diagULT b t =
   let (d,ns) = lamTree [] b t in
-  VC.diagDyckArcs_glue ns (Ch.lams2dow b t) d
+  let w = Ch.lams2dow b t in
+  VC.diagDyckArcs_glue ns (if b then w else reverse w) d
 
 
