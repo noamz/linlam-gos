@@ -6,6 +6,7 @@ theory of graphs on surfaces.  Besides browsing the
 [source code](src/), you can also:
 
 * Look at [related OEIS entries](doc/oeis.md)
+* Examine [tables of lambda terms](tables/) and reflect upon various [diagrams](diagrams/)
 * See [bibliographic references](doc/refs.md)
 
 Some quick explanations of terminology:
