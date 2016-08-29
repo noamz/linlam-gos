@@ -9,4 +9,4 @@
 
 ## Miscellaneous
 
-* Catalan structures: ![n<=4](catalan4.svg)
+* Catalan structures: ![n<=4](https://cdn.rawgit.com/noamz/linlam-gos/master/diagrams/catalan4.svg)
