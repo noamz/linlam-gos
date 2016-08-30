@@ -19,3 +19,9 @@ numberedHList xs = labelledHList $ zip xs (map (text . show) [1..])
 
 numberedVList :: [Diagram B] -> [Diagram B]
 numberedVList xs = labelledVList $ zip xs (map (text . show) [1..])
+
+unnumberedHList :: [Diagram B] -> [Diagram B]
+unnumberedHList xs = labelledHList $ zip xs (repeat mempty)
+
+unnumberedVList :: [Diagram B] -> [Diagram B]
+unnumberedVList xs = labelledVList $ zip xs (repeat mempty)
