@@ -15,6 +15,8 @@ General terms are indexed by number of applications + lambdas (n).
 Normal terms are indexed by number of neutral-normal switches (n), and grouped into rows by their underlying applicative structure.
 
 ### normal LR-planar terms
+#### n=1+1
+![n=1+1](https://cdn.rawgit.com/noamz/linlam-gos/master/diagrams/nptLR1.svg)
 #### n=2+1
 ![n=2+1](https://cdn.rawgit.com/noamz/linlam-gos/master/diagrams/nptLR2.svg)
 #### n=3+1
@@ -37,6 +39,8 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 ![n=5](https://cdn.rawgit.com/noamz/linlam-gos/master/diagrams/linearRL5.svg)
 
 ### normal RL-planar terms
+#### n=1+1
+![n=1+1](https://cdn.rawgit.com/noamz/linlam-gos/master/diagrams/nptRL1.svg)
 #### n=2+1
 ![n=2+1](https://cdn.rawgit.com/noamz/linlam-gos/master/diagrams/nptRL2.svg)
 #### n=3+1
