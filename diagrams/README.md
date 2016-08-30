@@ -5,8 +5,6 @@
 ### linear terms
 General terms are indexed by number of applications + lambdas (n).
 
-#### n=1
-![n=1](https://rawgit.com/noamz/linlam-gos/master/diagrams/linearLR1.svg)
 #### n=3
 ![n=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/linearLR3.svg)
 #### n=5
