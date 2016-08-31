@@ -35,6 +35,13 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 #### n=4+1
 ![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiLR4.svg)
 
+### normal linear terms
+
+#### n=1+1
+![n=1+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nltLR1.svg)
+#### n=2+1
+![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nltLR2.svg)
+
 ## Families of lambda terms (RL-planarity convention)
 
 ### linear terms
@@ -58,13 +65,6 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 ![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL3.svg)
 #### n=4+1
 ![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL4.svg)
-
-### normal linear terms
-
-#### n=1+1
-![n=1+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nltLR1.svg)
-#### n=2+1
-![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nltLR2.svg)
 
 ## Miscellaneous
 
