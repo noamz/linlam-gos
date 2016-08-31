@@ -50,6 +50,13 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 #### n=5
 ![n=5](https://rawgit.com/noamz/linlam-gos/master/diagrams/linearRL5.svg)
 
+### indecomposable linear terms
+
+#### n=3
+![n=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/indecompRL3.svg)
+#### n=5
+![n=5](https://rawgit.com/noamz/linlam-gos/master/diagrams/indecompRL5.svg)
+
 ### normal RL-planar terms
 #### n=1+1
 ![n=1+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptRL1.svg)
