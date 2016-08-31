@@ -3,12 +3,19 @@
 ## Families of lambda terms (LR-planarity convention)
 
 ### linear terms
-General terms are indexed by number of applications + lambdas (n).
+General (not necessarily normal) terms are indexed by number of applications + lambdas (n).
 
 #### n=3
 ![n=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/linearLR3.svg)
 #### n=5
 ![n=5](https://rawgit.com/noamz/linlam-gos/master/diagrams/linearLR5.svg)
+
+### indecomposable linear terms
+
+#### n=3
+![n=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/indecompLR3.svg)
+#### n=5
+![n=5](https://rawgit.com/noamz/linlam-gos/master/diagrams/indecompLR5.svg)
 
 ### normal LR-planar terms
 Normal terms are indexed by number of neutral-normal switches (n), and grouped into rows by their underlying applicative structure.
@@ -51,6 +58,13 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 ![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL3.svg)
 #### n=4+1
 ![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL4.svg)
+
+### normal linear terms
+
+#### n=1+1
+![n=1+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nltLR1.svg)
+#### n=2+1
+![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nltLR2.svg)
 
 ## Miscellaneous
 
