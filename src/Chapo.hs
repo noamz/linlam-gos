@@ -1,6 +1,7 @@
 module Chapo where
 
 import Data.List
+import Data.Maybe
 
 import Bijections
 import Lambda
@@ -32,6 +33,20 @@ lams2dowRL (V x) = [x]
 lams2dow :: Bool -> ULT -> [Int]
 lams2dow True t = lams2dowLR t
 lams2dow False t = lams2dowRL t
+
+normalize_dow :: Eq a => [a] -> [Int]
+normalize_dow w =
+  scan 0 [] (marked w [])
+  where
+    marked :: Eq a => [a] -> [a] -> [(Bool,a)]
+    marked [] seen = []
+    marked (x:xs) seen = if elem x seen then (True,x):marked xs seen
+                         else (False,x):marked xs (x:seen)
+    scan :: Eq a => Int -> [(a,Int)] -> [(Bool,a)] -> [Int]
+    scan n sigma [] = []
+    scan n sigma ((False,x):w) = n:scan (n+1) ((x,n):sigma) w
+    scan n sigma ((True,x):w) = (fromJust $ lookup x sigma):scan n sigma w
+
 
 lams2catLR :: ULT -> C.Catalan
 lams2catLR t = C.dyck2cat (lams2dowLR t)
@@ -100,5 +115,12 @@ conj4 n =
 conj5 :: Int -> Bool
 conj5 n =
   let ts = allcNPT True (n+1) in
-  let intervals = map (\t -> (C.dycks2cat $ lams2dowLR t,apps2cat t)) ts in
-  length (nub intervals) == length intervals
+  let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
+  length (nub pairs) == length pairs
+
+-- verified for n<=4
+conj6 :: Int -> Bool
+conj6 n =
+  let ts = allcNLT (n+1) in
+  let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
+  length (nub pairs) == length pairs
