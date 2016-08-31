@@ -124,3 +124,10 @@ conj6 n =
   let ts = allcNLT (n+1) in
   let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
   length (nub pairs) == length pairs
+
+-- verified for n<=4
+conj7 :: Int -> Bool
+conj7 n =
+  let ts = allcNLT (n+1) in
+  let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
+  n == 0 || length (nub pairs) < length pairs
