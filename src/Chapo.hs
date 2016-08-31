@@ -131,3 +131,25 @@ conj7 n =
   let ts = allcNLT (n+1) in
   let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
   n == 0 || length (nub pairs) < length pairs
+
+-- verified for n<=4
+conj8 :: Int -> Bool
+conj8 n =
+  let ts = allcULT (toInteger $ 2*n+1) in
+  let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
+  n == 0 || length (nub pairs) < length pairs
+
+
+-- verified for n<=6
+conj9 :: Int -> Bool
+conj9 n =
+  let ts = allnptiRL n in
+  let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
+  n <= 1 || length (nub pairs) < length pairs
+
+-- verified for n<=6
+conj10 :: Int -> Bool
+conj10 n =
+  let ts = allnptiLR n in
+  let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
+  length (nub pairs) == length pairs
