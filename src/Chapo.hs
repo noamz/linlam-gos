@@ -64,6 +64,7 @@ allnpti False n = allnptiRL n
 -- a simple conjecture about extracting the interval of the Tamari lattice
 -- corresponding to a normal planar indecomposable lambda term
 
+-- verified for n<=6
 conj1 :: Int -> Bool
 conj1 n =
   let ts = allnptiLR n in
@@ -71,6 +72,7 @@ conj1 n =
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
+-- false at n=2
 conj2 :: Int -> Bool
 conj2 n =
   let ts = allnptiRL n in
@@ -78,6 +80,7 @@ conj2 n =
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
+-- false at n=1
 conj3 :: Int -> Bool
 conj3 n =
   let ts = allnptiLR n in
@@ -85,6 +88,7 @@ conj3 n =
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
+-- false at n=3
 conj4 :: Int -> Bool
 conj4 n =
   let ts = allnptiRL n in
@@ -92,3 +96,9 @@ conj4 n =
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
+-- verified for n<=5
+conj5 :: Int -> Bool
+conj5 n =
+  let ts = allcNPT True (n+1) in
+  let intervals = map (\t -> (C.dycks2cat $ lams2dowLR t,apps2cat t)) ts in
+  length (nub intervals) == length intervals
