@@ -62,10 +62,14 @@ dow2arcs w = marked w []
     marked [] seen = []
     marked (x:xs) seen = if elem x seen then D x:marked xs seen else U x:marked xs (x:seen)
 
+arc2int :: Arc -> Int
+arc2int (U x) = -x
+arc2int (D x) = x
+
 arcs2signs :: Arcs -> [Bool]
 arcs2signs [] = []
-arcs2signs (U _:w) = True:arcs2signs w
-arcs2signs (D _:w) = False:arcs2signs w
+arcs2signs (U _:w) = False:arcs2signs w
+arcs2signs (D _:w) = True:arcs2signs w
 
 -- coercions checking that a tree has a special form
 
