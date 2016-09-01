@@ -8,6 +8,7 @@ import Data.List
 import Diagrams.Prelude
 import Diagrams.Backend.SVG.CmdLine
 
+import qualified Catalan as C
 import qualified Lambda as L
 import qualified Chapo as Ch
 
@@ -61,6 +62,5 @@ diagULT :: Bool -> L.ULT -> Diagram B
 diagULT b t =
   let (d,ns) = lamTree [] b t in
   let w = Ch.lams2dow b t in
-  VC.diagDyckArcs_glue ns (if b then w else reverse w) d
-
+  VC.diagArcs_glue ns (if b then w else C.fliparcs $ reverse w) d
 

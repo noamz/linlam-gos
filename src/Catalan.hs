@@ -70,6 +70,11 @@ arcs2signs [] = []
 arcs2signs (U _:w) = False:arcs2signs w
 arcs2signs (D _:w) = True:arcs2signs w
 
+fliparcs :: Arcs -> Arcs
+fliparcs [] = []
+fliparcs (U x:w) = D x:fliparcs w
+fliparcs (D x:w) = U x:fliparcs w
+
 -- coercions checking that a tree has a special form
 
 rightleaf :: Tree -> Tree
