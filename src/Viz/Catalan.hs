@@ -8,7 +8,9 @@ import Data.List
 import Diagrams.Prelude
 import Diagrams.Backend.SVG.CmdLine
 
-import Catalan as C
+import Catalan
+
+instance IsName Arc
 
 spot :: Diagram B
 spot = circle 0.01 # lwL 0.1 # fc black & pad 120
@@ -24,13 +26,13 @@ attach n1 n2 n =
    atop $
    position [(p,circle 0.2 # lwL 0.1 # fc black # named n & pad 3)]
 
--- given a name for the root together with a catalan structure, build a
--- binary tree diagram and return the list of names of the leaves
-catTree :: String -> Catalan -> (Diagram B, [String])
-catTree k L = (spot # named k, [k])
-catTree k (B t1 t2) =
-  let (d1,s1) = catTree ('L' : k) t1 in
-  let (d2,s2) = catTree ('R' : k) t2 in
+-- given a name for the root together with a binary tree, build a
+-- diagram and return the list of names of the leaves
+diagTree_st :: String -> Tree -> (Diagram B, [String])
+diagTree_st k L = (spot # named k, [k])
+diagTree_st k (B t1 t2) =
+  let (d1,s1) = diagTree_st ('L' : k) t1 in
+  let (d2,s2) = diagTree_st ('R' : k) t2 in
   let k1 = ('L' : k) in
   let k2 = ('R' : k) in
   (attach k1 k2 k (d1 ||| d2)
@@ -38,26 +40,20 @@ catTree k (B t1 t2) =
    # (connectOutside' (with & arrowHead .~ noHead) k k2 # lwL 0.1),
    s1 ++ s2)
 
-diagCatTree :: Catalan -> Diagram B
-diagCatTree c = fst $ catTree [] c
+diagTree :: Tree -> Diagram B
+diagTree c = fst $ diagTree_st [] c
 
-diagDyckArcs :: [Int] -> Diagram B
-diagDyckArcs w =
+diagArcs :: Arcs -> Diagram B
+diagArcs w =
   let pt n = spot # named n in
-  let marked [] seen = []
-      marked (x:xs) seen = if elem x seen then (True,x):marked xs seen else (False,x):marked xs (x:seen) in
-  let w' = marked w [] in
   let shaft = arc xDir (-1/2 @@ turn) in
-  hsep 1 (map pt w') #
-  applyAll [connect' (with & arrowHead .~ noHead & arrowShaft .~ shaft) (False,i) (True,i) # lwL 0.1 | (False,i) <- w']
+  hsep 1 (map pt w) #
+  applyAll [connect' (with & arrowHead .~ noHead & arrowShaft .~ shaft) (U i) (D i) # lwL 0.1 | U i <- w]
 
-diagDyckArcs_glue :: [String] -> [Int] -> Diagram B -> Diagram B
-diagDyckArcs_glue ns w d =
-  let marked [] seen = []
-      marked (x:xs) seen = if elem x seen then (True,x):marked xs seen else (False,x):marked xs (x:seen) in
-  let w' = marked w [] in
-  let dict = zip w' ns in
+diagArcs_glue :: [String] -> Arcs -> Diagram B -> Diagram B
+diagArcs_glue ns w d =
+  let dict = zip w ns in
   let shaft = arc xDir (-1/2 @@ turn) in
   d #
-  applyAll [connect' (with & arrowHead .~ noHead & arrowShaft .~ shaft) (fromJust $ lookup (False,i) dict) (fromJust $ lookup (True,i) dict) # lwL 0.1 | (False,i) <- w']
+  applyAll [connect' (with & arrowHead .~ noHead & arrowShaft .~ shaft) (fromJust $ lookup (U i) dict) (fromJust $ lookup (D i) dict) # lwL 0.1 | U i <- w]
 
