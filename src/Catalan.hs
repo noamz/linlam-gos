@@ -1,12 +1,15 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Catalan where
 
 import Data.Maybe
+import Data.Typeable
 
 data Tree = L | B Tree Tree
   deriving (Show,Eq)
 
 data Arc = U Int | D Int
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord,Typeable)
 type Arcs = [Arc]
 
 nodes :: Tree -> Int
@@ -61,10 +64,6 @@ dow2arcs w = marked w []
     marked :: [Int] -> [Int] -> Arcs
     marked [] seen = []
     marked (x:xs) seen = if elem x seen then D x:marked xs seen else U x:marked xs (x:seen)
-
-arc2int :: Arc -> Int
-arc2int (U x) = -x
-arc2int (D x) = x
 
 arcs2signs :: Arcs -> [Bool]
 arcs2signs [] = []
