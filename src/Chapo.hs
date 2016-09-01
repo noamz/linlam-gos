@@ -8,60 +8,36 @@ import Lambda
 import qualified Catalan as C
 import qualified Tamari as T
 
--- extract a catalan object from a lambda term by looking at its
+-- extract a binary tree from a lambda term by looking at its
 -- underlying applicative structure
 
-apps2cat :: ULT -> C.Catalan
-apps2cat (L _ t) = apps2cat t
-apps2cat (A t1 t2) = C.B (apps2cat t1) (apps2cat t2)
-apps2cat (V _) = C.L
+apps2tree :: ULT -> C.Tree
+apps2tree (L _ t) = apps2tree t
+apps2tree (A t1 t2) = C.B (apps2tree t1) (apps2tree t2)
+apps2tree (V _) = C.L
 
--- extract a catalan object from a (closed) planar lambda term by
+-- extract an arc diagram from a linear lambda term by
 -- looking at its underlying binding structure (we can use either
--- the LR or the RL planarity convention)
+-- the LR or the RL planarity convention to build the arc diagram)
 
-lams2dowLR :: ULT -> [Int]
-lams2dowLR (L x t) = x : lams2dowLR t
-lams2dowLR (A t1 t2) = lams2dowLR t1 ++ lams2dowLR t2
-lams2dowLR (V x) = [x]
+lams2dow :: Bool -> ULT -> C.Arcs
+lams2dow b (L x t) = C.U x : lams2dow b t
+lams2dow b (A t1 t2) = if b then lams2dow b t1 ++ lams2dow b t2
+                       else lams2dow b t2 ++ lams2dow b t1
+lams2dow b (V x) = [C.D x]
 
-lams2dowRL :: ULT -> [Int]
-lams2dowRL (L x t) = x : lams2dowRL t
-lams2dowRL (A t1 t2) = lams2dowRL t2 ++ lams2dowRL t1
-lams2dowRL (V x) = [x]
+lams2dowLR = lams2dow True
+lams2dowRL = lams2dow False
 
-lams2dow :: Bool -> ULT -> [Int]
-lams2dow True t = lams2dowLR t
-lams2dow False t = lams2dowRL t
-
-normalize_dow :: Eq a => [a] -> [Int]
-normalize_dow w =
-  scan 0 [] (marked w [])
-  where
-    marked :: Eq a => [a] -> [a] -> [(Bool,a)]
-    marked [] seen = []
-    marked (x:xs) seen = if elem x seen then (True,x):marked xs seen
-                         else (False,x):marked xs (x:seen)
-    scan :: Eq a => Int -> [(a,Int)] -> [(Bool,a)] -> [Int]
-    scan n sigma [] = []
-    scan n sigma ((False,x):w) = n:scan (n+1) ((x,n):sigma) w
-    scan n sigma ((True,x):w) = (fromJust $ lookup x sigma):scan n sigma w
-
-
-lams2catLR :: ULT -> C.Catalan
-lams2catLR t = C.dyck2cat (lams2dowLR t)
-
-lams2catRL :: ULT -> C.Catalan
-lams2catRL t = C.dyck2cat (lams2dowRL t)
-
--- extract a catalan object from a (closed) planar lambda term by
+-- extract an arc diagram from a normal linear lambda term by
 -- looking at its principal type
 
-type2catLR :: ULT -> C.Catalan
-type2catLR t = C.dycks2cat (linearizeType $ synthClosedNormal t)
+type2arcsLR :: ULT -> C.Arcs
+type2arcsLR t =
+  C.dow2arcs $ (reverse . drop 2 . reverse) $ linearizeType $ synthClosedNormal t
 
-type2catRL :: ULT -> C.Catalan
-type2catRL t = C.dyck2cat (linearizePos $ synthClosedNormal t)
+type2arcsRL :: ULT -> C.Arcs
+type2arcsRL t = C.dow2arcs $ linearizePos $ synthClosedNormal t
 
 -- the number of normal planar indecomposable lambda terms of size n+1 is
 -- equal to the number of intervals in the Tamari lattice T_n.
@@ -83,7 +59,7 @@ allnpti False n = allnptiRL n
 conj1 :: Int -> Bool
 conj1 n =
   let ts = allnptiLR n in
-  let intervals = map (\t -> (lams2catLR t,apps2cat t)) ts in
+  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2dowLR t,apps2tree t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
@@ -91,15 +67,15 @@ conj1 n =
 conj2 :: Int -> Bool
 conj2 n =
   let ts = allnptiRL n in
-  let intervals = map (\t -> (lams2catRL t,apps2cat t)) ts in
+  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2dowRL t,apps2tree t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
--- false at n=1
+-- false at n=2
 conj3 :: Int -> Bool
 conj3 n =
   let ts = allnptiLR n in
-  let intervals = map (\t -> (type2catLR t,apps2cat t)) ts in
+  let intervals = map (\t -> (C.arcs2tree $ type2arcsLR t,apps2tree t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
@@ -107,7 +83,7 @@ conj3 n =
 conj4 :: Int -> Bool
 conj4 n =
   let ts = allnptiRL n in
-  let intervals = map (\t -> (type2catRL t,apps2cat t)) ts in
+  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ type2arcsRL t,apps2tree t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
@@ -115,28 +91,28 @@ conj4 n =
 conj5 :: Int -> Bool
 conj5 n =
   let ts = allcNPT True (n+1) in
-  let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2dowLR t,apps2tree t)) ts in
   length (nub pairs) == length pairs
 
 -- verified for n<=4
 conj6 :: Int -> Bool
 conj6 n =
   let ts = allcNLT (n+1) in
-  let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2dowLR t,apps2tree t)) ts in
   length (nub pairs) == length pairs
 
 -- verified for n<=4
 conj7 :: Int -> Bool
 conj7 n =
   let ts = allcNLT (n+1) in
-  let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
   n == 0 || length (nub pairs) < length pairs
 
 -- verified for n<=4
 conj8 :: Int -> Bool
 conj8 n =
   let ts = allcULT (toInteger $ 2*n+1) in
-  let pairs = map (\t -> (normalize_dow $ lams2dowLR t,apps2cat t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2dowLR t,apps2tree t)) ts in
   n == 0 || length (nub pairs) < length pairs
 
 
@@ -144,12 +120,12 @@ conj8 n =
 conj9 :: Int -> Bool
 conj9 n =
   let ts = allnptiRL n in
-  let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
   n <= 1 || length (nub pairs) < length pairs
 
 -- verified for n<=6
 conj10 :: Int -> Bool
 conj10 n =
   let ts = allnptiLR n in
-  let pairs = map (\t -> (normalize_dow $ lams2dowRL t,apps2cat t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
   length (nub pairs) == length pairs

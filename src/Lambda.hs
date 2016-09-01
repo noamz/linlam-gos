@@ -547,7 +547,7 @@ eraseLambdas (L x t) = eraseLambdas t
 
 -- compute lambda skeleton, turning lambdas into binary nodes with one
 -- trivial child (the right child if b is false, left child otherwise)
-lambdaSkel :: Bool -> ULT -> C.Catalan
+lambdaSkel :: Bool -> ULT -> C.Tree
 lambdaSkel b (V _) = C.L
 lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
 lambdaSkel b (L _ t) = if b then C.B C.L (lambdaSkel b t)
