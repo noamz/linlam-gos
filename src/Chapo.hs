@@ -158,3 +158,12 @@ test11 n =
   filter (\(t1,t2) -> isJust $ pluglamapp (C.tree2arcs t1) t2) [(t1,t2) | t1 <- C.binary_trees (n+1), t2 <- C.binary_trees n]
 -- [length $ test11 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
 
+
+test12 :: Int -> [(C.Arcs,C.Tree)]
+test12 n =
+  filter (\(w1,t2) -> isJust $ pluglamapp w1 t2)
+  [(w1,t2) |
+   f1 <- involute [0..2*(n+1)-1],
+   let w1 = C.inv2arcs f1,
+   t2 <- C.binary_trees n]
+-- [length $ test12 n | n <- [0..]] == [1,3,26,367,7142,...]
