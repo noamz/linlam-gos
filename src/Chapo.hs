@@ -3,6 +3,7 @@ module Chapo where
 import Data.List
 import Data.Maybe
 
+import Formulas
 import Bijections
 import Lambda
 import qualified Catalan as C
@@ -33,18 +34,18 @@ lams2arcsRL = lams2arcs False
 -- and a binary tree representing its applicative structure, reconstruct
 -- a normal linear term
 
-pluglamapp :: C.Arcs -> C.Tree -> Maybe ULT
-pluglamapp (C.U x:w) c =
+arcstree2lam :: C.Arcs -> C.Tree -> Maybe ULT
+arcstree2lam (C.U x:w) c =
   if (C.D x) `elem` w then do
-    u <- pluglamapp w c
+    u <- arcstree2lam w c
     return $ L x u
   else Nothing
-pluglamapp [C.D x] C.L = return $ V x
-pluglamapp w (C.B c1 c2) = do
+arcstree2lam [C.D x] C.L = return $ V x
+arcstree2lam w (C.B c1 c2) = do
   let k = C.leaves c1
   let (w1,w2) = splitarcs k w
-  u1 <- pluglamapp w1 c1
-  u2 <- pluglamapp w2 c2
+  u1 <- arcstree2lam w1 c1
+  u2 <- arcstree2lam w2 c2
   return $ A u1 u2
   where
     splitarcs :: Int -> C.Arcs -> (C.Arcs,C.Arcs)
@@ -155,13 +156,13 @@ conj10 n =
 
 test11 :: Int -> [(C.Tree,C.Tree)]
 test11 n =
-  filter (\(t1,t2) -> isJust $ pluglamapp (C.tree2arcs t1) t2) [(t1,t2) | t1 <- C.binary_trees (n+1), t2 <- C.binary_trees n]
+  filter (\(t1,t2) -> isJust $ arcstree2lam (C.tree2arcs t1) t2) [(t1,t2) | t1 <- C.binary_trees (n+1), t2 <- C.binary_trees n]
 -- [length $ test11 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
 
 
 test12 :: Int -> [(C.Arcs,C.Tree)]
 test12 n =
-  filter (\(w1,t2) -> isJust $ pluglamapp w1 t2)
+  filter (\(w1,t2) -> isJust $ arcstree2lam w1 t2)
   [(w1,t2) |
    f1 <- involute [0..2*(n+1)-1],
    let w1 = C.inv2arcs f1,
