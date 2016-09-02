@@ -2,8 +2,11 @@
 
 module Catalan where
 
+import Data.List
 import Data.Maybe
 import Data.Typeable
+
+import Bijections
 
 data Tree = L | B Tree Tree
   deriving (Show,Eq)
@@ -74,6 +77,11 @@ fliparcs :: Arcs -> Arcs
 fliparcs [] = []
 fliparcs (U x:w) = D x:fliparcs w
 fliparcs (D x:w) = U x:fliparcs w
+
+-- generate an arc diagram from an involution
+inv2arcs :: [(Int,Int)] -> Arcs
+inv2arcs f = map (\i -> let j - act f i in if i < j then U i else D j)
+             (sort $ dom f)
 
 -- coercions checking that a tree has a special form
 
