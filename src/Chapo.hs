@@ -29,6 +29,29 @@ lams2dow b (V x) = [C.D x]
 lams2dowLR = lams2dow True
 lams2dowRL = lams2dow False
 
+-- given a double-occurrence word representing its binding structure,
+-- and a binary tree representing its applicative structure, reconstruct
+-- a normal linear term
+
+pluglamapp :: C.Arcs -> C.Tree -> Maybe ULT
+pluglamapp (C.U x:w) c =
+  if (C.D x) `elem` w then do
+    u <- pluglamapp w c
+    return $ L x u
+  else Nothing
+pluglamapp [C.D x] C.L = return $ V x
+pluglamapp w (C.B c1 c2) = do
+  let k = C.leaves c1
+  let (w1,w2) = splitarcs k w
+  u1 <- pluglamapp w1 c1
+  u2 <- pluglamapp w2 c2
+  return $ A u1 u2
+  where
+    splitarcs :: Int -> C.Arcs -> (C.Arcs,C.Arcs)
+    splitarcs 0 w = ([],w)
+    splitarcs n (C.U x:w) = let (w1,w2) = splitarcs n w in (C.U x:w1,w2)
+    splitarcs n (C.D x:w) = let (w1,w2) = splitarcs (n-1) w in (C.D x:w1,w2)
+
 -- extract an arc diagram from a normal linear lambda term by
 -- looking at its principal type
 
@@ -129,3 +152,9 @@ conj10 n =
   let ts = allnptiLR n in
   let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
   length (nub pairs) == length pairs
+
+test11 :: Int -> [(C.Tree,C.Tree)]
+test11 n =
+  filter (\(t1,t2) -> isJust $ pluglamapp (C.tree2arcs t1) t2) [(t1,t2) | t1 <- C.binary_trees (n+1), t2 <- C.binary_trees n]
+-- [length $ test11 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
+
