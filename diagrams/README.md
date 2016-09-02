@@ -46,10 +46,10 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 
 (These are not actual lambda terms, due to variable scoping violations.)
 
-#### n=1+1
-![n=1+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/pseudo-npt1.svg)
 #### n=2+1
 ![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/pseudo-npt2.svg)
+#### n=3+1
+![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/pseudo-npt3.svg)
 
 
 ## Families of lambda terms (RL-planarity convention)
