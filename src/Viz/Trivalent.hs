@@ -13,9 +13,9 @@ import Catalan as C
 
 import qualified Viz.Catalan as VC
 
-diagTrivalent :: Catalan -> [Int] -> Diagram B
+diagTrivalent :: Tree -> Arcs -> Diagram B
 diagTrivalent c w =
-  let (d,ns) = VC.catTree [] c in
-  VC.diagDyckArcs_glue ns w d
+  let (d,ns) = VC.diagTree_st [] c in
+  VC.diagArcs_glue ns w d
 
 

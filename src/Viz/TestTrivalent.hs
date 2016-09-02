@@ -21,5 +21,5 @@ main = do
   putStrLn "generating svg..."
   let b = False
   let npts = Lam.allcNPT b n
-  let d = hsep 3 $ numberedHList [diagTrivalent (Lam.lambdaSkel b t) (Ch.lams2dow b t) # centerX | t <- npts]
+  let d = hsep 3 $ numberedHList [diagTrivalent (Lam.lambdaSkel b t) (Ch.lams2arcs b t) # centerX | t <- npts]
   mainWith (d # frame 1)

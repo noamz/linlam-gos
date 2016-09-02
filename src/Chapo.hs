@@ -20,14 +20,14 @@ apps2tree (V _) = C.L
 -- looking at its underlying binding structure (we can use either
 -- the LR or the RL planarity convention to build the arc diagram)
 
-lams2dow :: Bool -> ULT -> C.Arcs
-lams2dow b (L x t) = C.U x : lams2dow b t
-lams2dow b (A t1 t2) = if b then lams2dow b t1 ++ lams2dow b t2
-                       else lams2dow b t2 ++ lams2dow b t1
-lams2dow b (V x) = [C.D x]
+lams2arcs :: Bool -> ULT -> C.Arcs
+lams2arcs b (L x t) = C.U x : lams2arcs b t
+lams2arcs b (A t1 t2) = if b then lams2arcs b t1 ++ lams2arcs b t2
+                       else lams2arcs b t2 ++ lams2arcs b t1
+lams2arcs b (V x) = [C.D x]
 
-lams2dowLR = lams2dow True
-lams2dowRL = lams2dow False
+lams2arcsLR = lams2arcs True
+lams2arcsRL = lams2arcs False
 
 -- given a double-occurrence word representing its binding structure,
 -- and a binary tree representing its applicative structure, reconstruct
@@ -82,7 +82,7 @@ allnpti False n = allnptiRL n
 conj1 :: Int -> Bool
 conj1 n =
   let ts = allnptiLR n in
-  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2dowLR t,apps2tree t)) ts in
+  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2arcsLR t,apps2tree t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
@@ -90,7 +90,7 @@ conj1 n =
 conj2 :: Int -> Bool
 conj2 n =
   let ts = allnptiRL n in
-  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2dowRL t,apps2tree t)) ts in
+  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2arcsRL t,apps2tree t)) ts in
   length (nub intervals) == length intervals &&
   flip all intervals (\(c1,c2) -> T.tamari_order c1 c2)
 
@@ -114,28 +114,28 @@ conj4 n =
 conj5 :: Int -> Bool
 conj5 n =
   let ts = allcNPT True (n+1) in
-  let pairs = map (\t -> (C.normalizeArcs $ lams2dowLR t,apps2tree t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2arcsLR t,apps2tree t)) ts in
   length (nub pairs) == length pairs
 
 -- verified for n<=4
 conj6 :: Int -> Bool
 conj6 n =
   let ts = allcNLT (n+1) in
-  let pairs = map (\t -> (C.normalizeArcs $ lams2dowLR t,apps2tree t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2arcsLR t,apps2tree t)) ts in
   length (nub pairs) == length pairs
 
 -- verified for n<=4
 conj7 :: Int -> Bool
 conj7 n =
   let ts = allcNLT (n+1) in
-  let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2arcsRL t,apps2tree t)) ts in
   n == 0 || length (nub pairs) < length pairs
 
 -- verified for n<=4
 conj8 :: Int -> Bool
 conj8 n =
   let ts = allcULT (toInteger $ 2*n+1) in
-  let pairs = map (\t -> (C.normalizeArcs $ lams2dowLR t,apps2tree t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2arcsLR t,apps2tree t)) ts in
   n == 0 || length (nub pairs) < length pairs
 
 
@@ -143,14 +143,14 @@ conj8 n =
 conj9 :: Int -> Bool
 conj9 n =
   let ts = allnptiRL n in
-  let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2arcsRL t,apps2tree t)) ts in
   n <= 1 || length (nub pairs) < length pairs
 
 -- verified for n<=6
 conj10 :: Int -> Bool
 conj10 n =
   let ts = allnptiLR n in
-  let pairs = map (\t -> (C.normalizeArcs $ lams2dowRL t,apps2tree t)) ts in
+  let pairs = map (\t -> (C.normalizeArcs $ lams2arcsRL t,apps2tree t)) ts in
   length (nub pairs) == length pairs
 
 test11 :: Int -> [(C.Tree,C.Tree)]
