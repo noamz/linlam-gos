@@ -34,19 +34,34 @@ lams2arcsRL = lams2arcs False
 -- and a binary tree representing its applicative structure, reconstruct
 -- a normal linear term
 
-arcstree2lam :: C.Arcs -> C.Tree -> Maybe ULT
-arcstree2lam (C.U x:w) c =
+arcstree2nlt :: C.Arcs -> C.Tree -> Maybe ULT
+arcstree2nlt (C.U x:w) c =
   if (C.D x) `elem` w then do
-    u <- arcstree2lam w c
+    u <- arcstree2nlt w c
     return $ L x u
   else Nothing
-arcstree2lam [C.D x] C.L = return $ V x
-arcstree2lam w (C.B c1 c2) = do
+arcstree2nlt [C.D x] C.L = return $ V x
+arcstree2nlt w (C.B c1 c2) = do
   let k = C.leaves c1
   let (w1,w2) = splitarcs k w
-  u1 <- arcstree2lam w1 c1
-  u2 <- arcstree2lam w2 c2
+  u1 <- arcstree2nlt w1 c1
+  u2 <- arcstree2nlt w2 c2
   return $ A u1 u2
+  where
+    splitarcs :: Int -> C.Arcs -> (C.Arcs,C.Arcs)
+    splitarcs 0 w = ([],w)
+    splitarcs n (C.U x:w) = let (w1,w2) = splitarcs n w in (C.U x:w1,w2)
+    splitarcs n (C.D x:w) = let (w1,w2) = splitarcs (n-1) w in (C.D x:w1,w2)
+
+arcstree2pseudonlt :: C.Arcs -> C.Tree -> ULT
+arcstree2pseudonlt (C.U x:w) c = L x (arcstree2pseudonlt w c)
+arcstree2pseudonlt [C.D x] C.L = V x
+arcstree2pseudonlt w (C.B c1 c2) =
+  let k = C.leaves c1 in
+  let (w1,w2) = splitarcs k w in
+  let u1 = arcstree2pseudonlt w1 c1 in
+  let u2 = arcstree2pseudonlt w2 c2 in
+  A u1 u2
   where
     splitarcs :: Int -> C.Arcs -> (C.Arcs,C.Arcs)
     splitarcs 0 w = ([],w)
@@ -156,15 +171,34 @@ conj10 n =
 
 test11 :: Int -> [(C.Tree,C.Tree)]
 test11 n =
-  filter (\(t1,t2) -> isJust $ arcstree2lam (C.tree2arcs t1) t2) [(t1,t2) | t1 <- C.binary_trees (n+1), t2 <- C.binary_trees n]
+  filter (\(t1,t2) -> isJust $ arcstree2nlt (C.tree2arcs t1) t2) [(t1,t2) | t1 <- C.binary_trees (n+1), t2 <- C.binary_trees n]
 -- [length $ test11 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
 
 
 test12 :: Int -> [(C.Arcs,C.Tree)]
 test12 n =
-  filter (\(w1,t2) -> isJust $ arcstree2lam w1 t2)
+  filter (\(w1,t2) -> isJust $ arcstree2nlt w1 t2)
   [(w1,t2) |
    f1 <- involute [0..2*(n+1)-1],
    let w1 = C.inv2arcs f1,
    t2 <- C.binary_trees n]
 -- [length $ test12 n | n <- [0..]] == [1,3,26,367,7142,...]
+
+pseudonpts :: Int -> [ULT]
+pseudonpts n =
+  map (uncurry arcstree2pseudonlt) $
+  filter (\(w1,t2) -> isNothing $ arcstree2nlt w1 t2)
+  [(w1,t2) |
+   t1 <- C.binary_trees (n+1),
+   let w1 = C.tree2arcs t1,
+   t2 <- C.binary_trees n]
+
+pseudonlts :: Int -> [ULT]
+pseudonlts n =
+  map (uncurry arcstree2pseudonlt) $
+  filter (\(w1,t2) -> isNothing $ arcstree2nlt w1 t2)
+  [(w1,t2) |
+   f1 <- involute [0..2*(n+1)-1],
+   let w1 = C.inv2arcs f1,
+   t2 <- C.binary_trees n]
+
