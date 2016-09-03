@@ -41,9 +41,9 @@ arcstree2nlt (C.U x:w) c =
     return $ L x u
   else Nothing
 arcstree2nlt [C.D x] C.L = return $ V x
-arcstree2nlt w (C.B c1 c2) = do
+arcstree2nlt (C.D x:w) (C.B c1 c2) = do
   let k = C.leaves c1
-  let (w1,w2) = splitarcs k w
+  let (w1,w2) = splitarcs k (C.D x:w)
   u1 <- arcstree2nlt w1 c1
   u2 <- arcstree2nlt w2 c2
   return $ A u1 u2
@@ -56,9 +56,9 @@ arcstree2nlt w (C.B c1 c2) = do
 arcstree2pseudonlt :: C.Arcs -> C.Tree -> ULT
 arcstree2pseudonlt (C.U x:w) c = L x (arcstree2pseudonlt w c)
 arcstree2pseudonlt [C.D x] C.L = V x
-arcstree2pseudonlt w (C.B c1 c2) =
+arcstree2pseudonlt (C.D x:w) (C.B c1 c2) =
   let k = C.leaves c1 in
-  let (w1,w2) = splitarcs k w in
+  let (w1,w2) = splitarcs k (C.D x:w) in
   let u1 = arcstree2pseudonlt w1 c1 in
   let u2 = arcstree2pseudonlt w2 c2 in
   A u1 u2
