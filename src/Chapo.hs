@@ -31,8 +31,8 @@ lams2arcsLR = lams2arcs True
 lams2arcsRL = lams2arcs False
 
 -- given a double-occurrence word representing its binding structure,
--- and a binary tree representing its applicative structure, reconstruct
--- a normal linear term
+-- and a binary tree representing its applicative structure, attempt
+-- to reconstruct a normal linear term
 
 arcstree2nlt :: C.Arcs -> C.Tree -> Maybe ULT
 arcstree2nlt (C.U x:w) c =
@@ -53,6 +53,8 @@ arcstree2nlt (C.D x:w) (C.B c1 c2) = do
     splitarcs n (C.U x:w) = let (w1,w2) = splitarcs n w in (C.U x:w1,w2)
     splitarcs n (C.D x:w) = let (w1,w2) = splitarcs (n-1) w in (C.D x:w1,w2)
 
+-- reconstruct a normal "pseudo"-term (this always succeeds)
+
 arcstree2pseudonlt :: C.Arcs -> C.Tree -> ULT
 arcstree2pseudonlt (C.U x:w) c = L x (arcstree2pseudonlt w c)
 arcstree2pseudonlt [C.D x] C.L = V x
@@ -67,6 +69,24 @@ arcstree2pseudonlt (C.D x:w) (C.B c1 c2) =
     splitarcs 0 w = ([],w)
     splitarcs n (C.U x:w) = let (w1,w2) = splitarcs n w in (C.U x:w1,w2)
     splitarcs n (C.D x:w) = let (w1,w2) = splitarcs (n-1) w in (C.D x:w1,w2)
+
+pseudonpts :: Int -> [ULT]
+pseudonpts n =
+  map (uncurry arcstree2pseudonlt) $
+  filter (\(w1,t2) -> isNothing $ arcstree2nlt w1 t2)
+  [(w1,t2) |
+   t1 <- C.binary_trees (n+1),
+   let w1 = C.tree2arcs t1,
+   t2 <- C.binary_trees n]
+
+pseudonlts :: Int -> [ULT]
+pseudonlts n =
+  map (uncurry arcstree2pseudonlt) $
+  filter (\(w1,t2) -> isNothing $ arcstree2nlt w1 t2)
+  [(w1,t2) |
+   f1 <- involute [0..2*(n+1)-1],
+   let w1 = C.inv2arcs f1,
+   t2 <- C.binary_trees n]
 
 -- extract an arc diagram from a normal linear lambda term by
 -- looking at its principal type
@@ -184,21 +204,44 @@ test12 n =
    t2 <- C.binary_trees n]
 -- [length $ test12 n | n <- [0..]] == [1,3,26,367,7142,...]
 
-pseudonpts :: Int -> [ULT]
-pseudonpts n =
-  map (uncurry arcstree2pseudonlt) $
-  filter (\(w1,t2) -> isNothing $ arcstree2nlt w1 t2)
-  [(w1,t2) |
-   t1 <- C.binary_trees (n+1),
-   let w1 = C.tree2arcs t1,
-   t2 <- C.binary_trees n]
+seq1_acc :: ([Int],C.Arcs) -> C.Tree -> Maybe ([Int],C.Arcs)
+seq1_acc (g,(C.U x:w)) c = do
+  (g',w') <- seq1_acc ((x:g),w) c
+  if x `elem` g' then Nothing else return (g',w')
+seq1_acc (x:g, C.D x':w) C.L = if x == x' then Just (g,w) else Nothing
+seq1_acc (x:g, C.D x':w) (C.B c1 c2) =
+  if x == x' then do
+    (g',w') <- seq1_acc (x:g, C.D x':w) c1
+    (g'',w'') <- seq1_acc (g',w') c2
+    return (g'',w'')
+  else Nothing
+seq1_acc _ _ = Nothing
 
-pseudonlts :: Int -> [ULT]
-pseudonlts n =
-  map (uncurry arcstree2pseudonlt) $
-  filter (\(w1,t2) -> isNothing $ arcstree2nlt w1 t2)
-  [(w1,t2) |
-   f1 <- involute [0..2*(n+1)-1],
-   let w1 = C.inv2arcs f1,
-   t2 <- C.binary_trees n]
+seq1 :: C.Arcs -> C.Tree -> Bool
+seq1 w c = seq1_acc ([],w) c == Just ([],[])
 
+test13 :: Int -> [(C.Arcs,C.Tree)]
+test13 n =
+  filter (uncurry seq1) [(w1,t2) | t1 <- C.binary_trees (n+1), let w1 = C.tree2arcs t1, t2 <- C.binary_trees n]
+
+seq2_acc :: ([Int],C.Arcs) -> C.Tree -> Maybe ([Int],C.Arcs)
+seq2_acc (y:g,(C.U x:w)) c = do
+  (g',w') <- seq2_acc ((x:y:g),w) c
+  if x `elem` g' || y `elem` g' then Nothing else return (g',w')
+seq2_acc (x:g, C.D x':w) C.L = if x == x' then Just (g,w) else Nothing
+seq2_acc (x:g, C.D x':w) (C.B c1 c2) =
+  if x == x' then do
+    (g',w') <- seq2_acc (x:g, C.D x':w) c1
+    (g'',w'') <- seq2_acc (g',w') c2
+    return (g'',w'')
+  else Nothing
+seq2_acc _ _ = Nothing
+
+seq2 :: C.Arcs -> C.Tree -> Bool
+seq2 (C.U x:w) c = seq2_acc ([x],w) c == Just ([],[])
+
+test14 :: Int -> [(C.Arcs,C.Tree)]
+test14 n =
+  filter (uncurry seq2) [(w1,t2) | t1 <- C.binary_trees (n+1), let w1 = C.tree2arcs t1, t2 <- C.binary_trees n]
+
+-- [length $ test13 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
