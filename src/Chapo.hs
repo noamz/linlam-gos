@@ -224,6 +224,8 @@ test13 :: Int -> [(C.Arcs,C.Tree)]
 test13 n =
   filter (uncurry seq1) [(w1,t2) | t1 <- C.binary_trees (n+1), let w1 = C.tree2arcs t1, t2 <- C.binary_trees n]
 
+-- [length $ test13 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
+
 seq2_acc :: ([Int],C.Arcs) -> C.Tree -> Maybe ([Int],C.Arcs)
 seq2_acc (y:g,(C.U x:w)) c = do
   (g',w') <- seq2_acc ((x:y:g),w) c
@@ -244,4 +246,5 @@ test14 :: Int -> [(C.Arcs,C.Tree)]
 test14 n =
   filter (uncurry seq2) [(w1,t2) | t1 <- C.binary_trees (n+1), let w1 = C.tree2arcs t1, t2 <- C.binary_trees n]
 
--- [length $ test13 n | n <- [0..]] == [1,2,9,54,378,2916,24057,...]
+-- [length $ test14 n | n <- [0..]] == [1,1,3,13,68,399,2530,...]
+
