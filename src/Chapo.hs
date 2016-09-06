@@ -263,3 +263,9 @@ conj16 n =
   let byvarsapps = map (\t -> let (g,u) = unlambdas t in (length g, length (snd $ unapps u []))) ts in
   let byspines = map (\(t1,t2) -> (1 + length (C.tree2spine t1), length (C.tree2spine t2))) (T.tamari n) in
   sort byvarsapps == sort byspines
+
+chapo17 :: Int -> [ULT]
+chapo17 n = [t | t <- allnptiLR n, let (g,u) = unlambdas t in length (snd $ unapps u []) == 1]
+
+-- [length $ chapo17 n | n <- [0..]] == [0,1,2,8,41,240,1528,...]
+-- cf. Chapoton, Section 5, Equation (12)
