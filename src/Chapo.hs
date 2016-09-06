@@ -256,3 +256,12 @@ conj15 n =
   let tam = [(t1,t2) | t2 <- C.binary_trees n, t1 <- T.tamari_down t2] in
   let byspine = map (\(t1,t2) -> 1 + length (C.tree2spine t1)) tam in
   sort byvars == sort byspine
+
+-- verified for n<=6
+conj16 :: Int -> Bool
+conj16 n =
+  let ts = allnptiLR n in
+  let byvarsapps = map (\t -> let (g,u) = unlambdas t in (length g, length (snd $ unapps u []))) ts in
+  let tam = [(t1,t2) | t2 <- C.binary_trees n, t1 <- T.tamari_down t2] in
+  let byspines = map (\(t1,t2) -> (1 + length (C.tree2spine t1), length (C.tree2spine t2))) tam in
+  sort byvarsapps == sort byspines
