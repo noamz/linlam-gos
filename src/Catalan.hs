@@ -92,3 +92,13 @@ rightleaf _ = error "tree not of form (B t L)"
 leftleaf :: Tree -> Tree
 leftleaf (B L t) = t
 leftleaf _ = error "tree not of form (B L t)"
+
+-- factor a tree along its left-branching spine
+
+tree2spine :: Tree -> [Tree]
+tree2spine L = []
+tree2spine (B t1 t2) = t2 : tree2spine t1
+
+spine2tree :: [Tree] -> Tree
+spine2tree s = foldr (\t2 t1 -> B t1 t2) L s
+
