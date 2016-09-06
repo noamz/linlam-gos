@@ -248,3 +248,11 @@ test14 n =
 
 -- [length $ test14 n | n <- [0..]] == [1,1,3,13,68,399,2530,...]
 
+-- verified for n<=6
+conj15 :: Int -> Bool
+conj15 n =
+  let ts = allnptiLR n in
+  let byvars = map (\t ->  length (fst $ unlambdas t)) ts in
+  let tam = [(t1,t2) | t2 <- C.binary_trees n, t1 <- T.tamari_down t2] in
+  let byspine = map (\(t1,t2) -> 1 + length (C.tree2spine t1)) tam in
+  sort byvars == sort byspine
