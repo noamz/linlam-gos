@@ -87,3 +87,6 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 
 ### Catalan structures
 ![n<=4](https://rawgit.com/noamz/linlam-gos/master/diagrams/catalan4.svg)
+
+### Involutions
+![n<=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/involutions3.svg)
