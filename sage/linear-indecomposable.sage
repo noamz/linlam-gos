@@ -2,7 +2,7 @@
 
 R.<x,z> = ZZ[]
 
-max = 30
+max = 40
 B = Sequence([0..max],R)
 
 for i in range(max):
