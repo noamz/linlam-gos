@@ -56,6 +56,11 @@ normalizeArcs w =
     scan n sigma (U x:w) = U n:scan (n+1) ((x,n):sigma) w
     scan n sigma (D x:w) = D (fromJust $ lookup x sigma):scan n sigma w
 
+maparcs :: (Int -> Int) -> (Int -> Int) -> Arcs -> Arcs
+maparcs f g [] = []
+maparcs f g (U x:w) = U (f x) : maparcs f g w
+maparcs f g (D x:w) = D (g x) : maparcs f g w
+
 arcs2dow :: Arcs -> [Int]
 arcs2dow [] = []
 arcs2dow (U x:w) = x:arcs2dow w
