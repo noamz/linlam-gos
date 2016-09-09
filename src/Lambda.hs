@@ -279,6 +279,15 @@ normal_subnormals t = t : normal_subneutrals t
 normal_subneutrals (A t1 t2) = normal_subneutrals t1 ++ normal_subnormals t2
 normal_subneutrals (V x) = []
 
+-- size of a normal/neutral term, measured by number of neutral-normal switches
+
+sizeNormal :: ULT -> Int
+sizeNeutral :: ULT -> Int
+sizeNormal (L x t) = sizeNormal t
+sizeNormal t = 1+sizeNeutral t
+sizeNeutral (A t u) = sizeNeutral t + sizeNormal u
+sizeNeutral (V x) = 0
+  
 {-- NORMALIZATION OF LINEAR LAMBDA TERMS --}
 
 -- type of one-hole contexts for linear lambda terms
