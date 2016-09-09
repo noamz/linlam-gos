@@ -284,7 +284,12 @@ getRedex (L x t) = [(t1,u1,L' x r1) | (t1,u1,r1) <- getRedex t]
 subst :: (ULT,Int) -> ULT -> ULT
 subst (t0,x) (V y) = if x == y then t0 else (V y)
 subst (t0,x) (A t1 t2) = A (subst (t0,x) t1) (subst (t0,x) t2)
-subst (t0,x) (L y t1) = L y (if x /= y then subst (t0,x) t1 else t1)
+subst (t0,x) (L y t1) =
+  if x == y then L y t1
+  else if not $ elem y (freevars t0) then L y (subst (t0,x) t1)
+  else
+     let y' = 1 + foldr max x (freevars t0 ++ freevars t1) in
+     L y' (subst (t0,x) $ subst (V y',y) t1)
 
 -- step t computes all possible developments of t by one beta-redex
 step :: ULT -> [ULT]
