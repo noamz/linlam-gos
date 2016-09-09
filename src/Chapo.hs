@@ -269,3 +269,12 @@ chapo17 n = [t | t <- allnptiLR n, let (g,u) = unlambdas t in length (snd $ unap
 
 -- [length $ chapo17 n | n <- [0..]] == [0,1,2,8,41,240,1528,...]
 -- cf. Chapoton, Section 5, Equation (12)
+
+-- verified for n<=7
+conj18 :: Int -> Bool
+conj18 n = length (idempotents $ allnptiRL n) == catalan n
+
+-- verified for n<=7
+conj19 :: Int -> Bool
+conj19 n = sort (map apps2tree $ idempotents $ allnptiRL n) == sort (C.binary_trees n)
+

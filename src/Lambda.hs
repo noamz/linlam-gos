@@ -336,6 +336,10 @@ normalize t =
   let t' = step t in
   if t' == [] then t else normalize (head t')
 
+-- test for beta equality
+beta :: ULT -> ULT -> Bool
+beta t u = alpha (normalize t) (normalize u)
+
 -- computes the number of steps to reach a normal form.
 distnf :: ULT -> Int
 distnf t =
@@ -588,7 +592,16 @@ lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
 lambdaSkel b (L _ t) = if b then C.B C.L (lambdaSkel b t)
                        else C.B (lambdaSkel b t) C.L
 
--- combinators
+-- Scott construction
 
 compose :: ULT -> ULT -> ULT
 compose t u = L 0 (A t (A u (V 0)))
+
+isIdempotent :: ULT -> Bool
+isIdempotent t = beta (compose t t) t
+
+idempotents :: [ULT] -> [ULT]
+idempotents = filter isIdempotent
+
+kmorphism :: ULT -> ULT -> ULT -> Bool
+kmorphism f i j = beta (compose i (compose f j)) f
