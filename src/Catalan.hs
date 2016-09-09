@@ -9,7 +9,7 @@ import Data.Typeable
 import Bijections
 
 data Tree = L | B Tree Tree
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord,Typeable)
 
 data Arc = U Int | D Int
   deriving (Show,Eq,Ord,Typeable)
