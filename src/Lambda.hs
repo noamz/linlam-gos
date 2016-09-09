@@ -587,3 +587,8 @@ lambdaSkel b (V _) = C.L
 lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
 lambdaSkel b (L _ t) = if b then C.B C.L (lambdaSkel b t)
                        else C.B (lambdaSkel b t) C.L
+
+-- combinators
+
+compose :: ULT -> ULT -> ULT
+compose t u = L 0 (A t (A u (V 0)))
