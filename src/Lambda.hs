@@ -221,6 +221,27 @@ genNormalO lr env n = do
 allcNPT :: Bool -> Int -> [ULT]
 allcNPT lr n = [t | t <- map fst $ runStateT (genNormalO lr [] (toInteger n)) 0]
 
+-- directly generate neutral and normal indecomposable ordered terms (turn on bit for LR)
+genNeutralOnb :: Bool -> [Int] -> Integer -> StateT Int [] ULT
+genNormalOnb  :: Bool -> [Int] -> Integer -> StateT Int [] ULT
+genNeutralOnb lr [x] 0 = return (V x)
+genNeutralOnb lr _ 0 = mzero
+genNeutralOnb lr env n = do
+  (env1,env2) <- lift ([splitAt i env | i <- [0..length env]])
+  if env2 == [] then mzero else do
+  i <- lift [0..n-1]
+  t <- genNeutralOnb lr env1 i
+  u <- genNormalOnb lr env2 (n-i)
+  return (A t u)
+genNormalOnb lr env n = do
+  k <- lift [0..n-toInteger(length env)]
+  xs <- freshInts k
+  t <- genNeutralOnb lr (if lr then reverse xs ++ env else env ++ xs) (n-1)
+  return $ foldr L t xs
+
+allcNPTnb :: Bool -> Int -> [ULT]
+allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalOnb lr [] (toInteger n)) 0]
+
 unNeutral :: ULT -> [ULT] -> (Int,[ULT])
 unNeutral (V x) args = (x,args)
 unNeutral (A t u) args = unNeutral t (u:args)

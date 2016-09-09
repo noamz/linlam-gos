@@ -102,10 +102,10 @@ type2arcsRL t = C.dow2arcs $ linearizePos $ synthClosedNormal t
 -- equal to the number of intervals in the Tamari lattice T_n.
 
 allnptiRL :: Int -> [ULT]
-allnptiRL n = filter isIndecomposable $ allcNPT False (n+1)
+allnptiRL n = allcNPTnb False (n+1)
 
 allnptiLR :: Int -> [ULT]
-allnptiLR n = filter isIndecomposable $ allcNPT True (n+1)
+allnptiLR n = allcNPTnb True (n+1)
 
 allnpti :: Bool -> Int -> [ULT]
 allnpti True n = allnptiLR n
