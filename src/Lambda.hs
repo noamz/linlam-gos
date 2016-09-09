@@ -21,10 +21,10 @@ data ULT = V Int | A ULT ULT | L Int ULT
 -- type of linear lambda terms with explicit context
 type ULTc = ([Int],ULT)
 
-mapvar :: (Int -> Int) -> ULT -> ULT
-mapvar f (V x) = V (f x)
-mapvar f (A t u) = A (mapvar f t) (mapvar f u)
-mapvar f (L x u) = L x (mapvar f u)
+rename :: (Int,Int) -> ULT -> ULT
+rename (x1,x2) (V x) = if x == x1 then V x2 else V x
+rename (x1,x2) (A t u) = A (rename (x1,x2) t) (rename (x1,x2) u)
+rename (x1,x2) (L x u) = if x == x1 then L x u else L x (rename (x1,x2) u)
 
 -- alpha-equivalence of raw terms
 -- we assume that all lambdas bind distinct variables, named by non-negative integers
@@ -32,13 +32,13 @@ alpha :: ULT -> ULT -> Bool
 alpha (V x1) (V x2) = x1 == x2
 alpha (A t1 u1) (A t2 u2) = alpha t1 t2 && alpha u1 u2
 alpha (L x1 t1) (L x2 t2) = alpha
-                            (mapvar (swap x1 (-x1-1)) t1)
-                            (mapvar (swap x2 (-x1-1)) t2)
+                            (rename (x1,(-x1-1)) t1)
+                            (rename (x2,(-x1-1)) t2)
 alpha _ _ = False
 -- alpha-equivalence of terms in context
 alphac :: ULTc -> ULTc -> Bool
 alphac ([],t1) ([],t2) = alpha t1 t2
-alphac (x1:g1,t1) (x2:g2,t2) = alphac (g1,mapvar (swap x1 (-x1-1)) t1) (g2,mapvar (swap x2 (-x1-1)) t2)
+alphac (x1:g1,t1) (x2:g2,t2) = alphac (g1,rename (x1,(-x1-1)) t1) (g2,rename (x2,(-x1-1)) t2)
 alphac _ _ = False
 
 -- free variables of a raw term
