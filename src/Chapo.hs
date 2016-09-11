@@ -6,6 +6,8 @@ import Data.Maybe
 import Formulas
 import Bijections
 import Lambda
+import Scott1980
+
 import qualified Catalan as C
 import qualified Tamari as T
 
@@ -274,7 +276,32 @@ chapo17 n = [t | t <- allnptiLR n, let (g,u) = unlambdas t in length (snd $ unap
 conj18 :: Int -> Bool
 conj18 n = length (idempotents $ allnptiRL n) == catalan n
 
+-- other computations:
+-- [length (idempotents $ allcNPT False n) | n <- [1..]] == [1,1,2,6,21,83,353,...]
+-- [length (idempotents $ allcNPT True n) | n <- [1..]] == [1,0,1,1,9,23,163,...]
+-- [length (idempotents $ allcNLT n) | n <- [1..]] == [1,1,3,13,72,477,...]
+
 -- verified for n<=7
 conj19 :: Int -> Bool
 conj19 n = sort (map apps2tree $ idempotents $ allnptiRL n) == sort (C.binary_trees n)
 
+-- false at n==4
+conj20 :: Int -> Bool
+conj20 n =
+  let ts = allnptiRL n in
+  let typetree t = C.rightleaf $ C.arcs2tree $ type2arcsRL t in
+  let bytypes = equivClassesBy (\t1 t2 -> typetree t1 == typetree t2) ts [] in
+  let downsets = map T.tamari_down (C.binary_trees n) in
+  (sort $ map length bytypes) == (sort $ map length downsets)
+
+-- verified for n<=7
+conj21 :: Int -> Bool
+conj21 n =
+  let props = idempotents $ allnptiRL n in
+  all id [beta (compose i j) (compose j i) | i <- props, j <- props]
+
+-- false at n==3
+conj22 :: Int -> Bool
+conj22 n =
+  let props = idempotents $ allcNPT False (n+1) in
+  all id [beta (compose i j) (compose j i) | i <- props, j <- props]
