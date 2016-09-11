@@ -83,6 +83,14 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 #### n=4+1
 ![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL4.svg)
 
+### indecomposable normal RL-planar terms (with types)
+#### n=2+1
+![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL2types.svg)
+#### n=3+1
+![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL3types.svg)
+#### n=4+1
+![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL4types.svg)
+
 ## Miscellaneous
 
 ### Catalan structures
