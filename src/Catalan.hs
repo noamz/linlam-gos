@@ -88,6 +88,12 @@ inv2arcs :: [(Int,Int)] -> Arcs
 inv2arcs f = map (\i -> let j = act f i in if i < j then U i else D j)
              (sort $ dom f)
 
+-- dualize a tree by swapping left and right children
+
+dualtree :: Tree -> Tree
+dualtree L = L
+dualtree (B t1 t2) = B (dualtree t2) (dualtree t1)
+
 -- coercions checking that a tree has a special form
 
 rightleaf :: Tree -> Tree
@@ -105,5 +111,11 @@ tree2spine L = []
 tree2spine (B t1 t2) = t2 : tree2spine t1
 
 spine2tree :: [Tree] -> Tree
-spine2tree s = foldr (\t2 t1 -> B t1 t2) L s
+spine2tree s = foldr (\y x -> B x y) L s
 
+-- graft product: lgraft t1 t2 grafts t1 onto the leftmost leaf of t2
+
+lgraft t1 t2 = foldr (\x y -> B y x) t1 (tree2spine t2)
+
+-- rgraft t1 t2 grafts t2 onto the rightmost leaf of t1
+rgraft t1 t2 = dualtree (lgraft (dualtree t2) (dualtree t1))
