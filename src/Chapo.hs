@@ -305,3 +305,9 @@ conj22 :: Int -> Bool
 conj22 n =
   let props = idempotents $ allcNPT False (n+1) in
   all id [beta (compose i j) (compose j i) | i <- props, j <- props]
+
+-- false at n==3
+conj23 :: Int -> Bool
+conj23 n =
+  let props = idempotents $ allcNLTnb (n+1) in
+  all id [beta (compose i j) (compose j i) | i <- props, j <- props]
