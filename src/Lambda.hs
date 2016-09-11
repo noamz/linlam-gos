@@ -73,6 +73,10 @@ isVar _ = False
 unlambda :: ULT -> ULT
 unlambda (L x t) = t
 
+-- coerce a variable to an integer
+unVar :: ULT -> Int
+unVar (V x) = x
+
 -- remove string of outermost lambdas
 unlambdas :: ULT -> ([Int],ULT)
 unlambdas (L x t) = let (vars,r) = unlambdas t in (x:vars,r)
@@ -82,16 +86,18 @@ unlambdas t = ([],t)
 argapp :: ULT -> ULT
 argapp (A t u) = u
 
--- collect arguments of an iterated application
+-- collect arguments and head variable of an iterated application
 unapps :: ULT -> [ULT] -> (Int,[ULT])
 unapps (A t u) args = unapps t (u:args)
 unapps (V x) args = (x,args)
 
+-- return the head variable of an iterated application
 headvar :: ULT -> Int
 headvar t = fst (unapps t [])
 
-unVar :: ULT -> Int
-unVar (V x) = x
+-- build an iterated application given a head variable and list of arguments
+apps :: Int -> [ULT] -> ULT
+apps x ts = foldl A (V x) ts
 
 -- collect arguments of a variable occurring in a term
 varargs_cps :: ULT -> Int -> [ULT] -> [ULT] -> [ULT]
@@ -200,6 +206,27 @@ allcNLT n = [t | t <- map fst $ runStateT (genNormal [] (toInteger n)) 0]
 
 allNeutral :: Int -> [ULTc]
 allNeutral n = [([0..k-1],t) | k <- [0..n+1], t <- map fst $ runStateT (genNeutral [0..k-1] (toInteger n)) k]
+
+-- directly generate neutral and normal indecomposable terms
+genNeutralnb :: [Int] -> Integer -> StateT Int [] ULT
+genNormalnb  :: [Int] -> Integer -> StateT Int [] ULT
+genNeutralnb [x] 0 = return (V x)
+genNeutralnb _ 0 = mzero
+genNeutralnb env n = do
+  (env1,env2) <- lift (split env)
+  if env2 == [] then mzero else do
+  i <- lift [0..n-1]
+  t <- genNeutralnb env1 i
+  u <- genNormalnb env2 (n-i)
+  return (A t u)
+genNormalnb env n = do
+  k <- lift [0..n-toInteger(length env)]
+  xs <- freshInts k
+  t <- genNeutralnb (env ++ xs) (n-1)
+  return $ foldr L t xs
+
+allcNLTnb :: Int -> [ULT]
+allcNLTnb n = [t | t <- map fst $ runStateT (genNormalnb [] (toInteger n)) 0]
 
 -- directly generate neutral and normal ordered terms (turn on bit for LR)
 genNeutralO :: Bool -> [Int] -> Integer -> StateT Int [] ULT
@@ -591,17 +618,3 @@ lambdaSkel b (V _) = C.L
 lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
 lambdaSkel b (L _ t) = if b then C.B C.L (lambdaSkel b t)
                        else C.B (lambdaSkel b t) C.L
-
--- Scott construction
-
-compose :: ULT -> ULT -> ULT
-compose t u = L 0 (A t (A u (V 0)))
-
-isIdempotent :: ULT -> Bool
-isIdempotent t = beta (compose t t) t
-
-idempotents :: [ULT] -> [ULT]
-idempotents = filter isIdempotent
-
-kmorphism :: ULT -> ULT -> ULT -> Bool
-kmorphism f i j = beta (compose i (compose f j)) f
