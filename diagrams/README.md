@@ -85,11 +85,11 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 
 ### indecomposable normal RL-planar terms (with types)
 #### n=2+1
-![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL2types.svg)
+![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRLtypes2.svg)
 #### n=3+1
-![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL3types.svg)
+![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRLtypes3.svg)
 #### n=4+1
-![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRL4types.svg)
+![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiRLtypes4.svg)
 
 ## Miscellaneous
 
