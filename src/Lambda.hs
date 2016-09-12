@@ -86,6 +86,10 @@ unlambdas t = ([],t)
 argapp :: ULT -> ULT
 argapp (A t u) = u
 
+-- get function of an application
+argfn :: ULT -> ULT
+argfn (A t u) = t
+
 -- collect arguments and head variable of an iterated application
 unapps :: ULT -> [ULT] -> (Int,[ULT])
 unapps (A t u) args = unapps t (u:args)
@@ -372,6 +376,35 @@ distnf :: ULT -> Int
 distnf t =
   let t' = step t in
   if t' == [] then 0 else 1 + distnf (head t')
+
+-- return the list of eta-redexes in a term t.  An eta-redex is represented as
+-- a triple (x,u,c), where L x (A u (V x)) is an eta-redex and t == plug c (L x (A u (V x))).
+getEta :: ULT -> [(Int,ULT,ULT')]
+getEta (V _) = []
+getEta (A t u) = [(x1,u1,A'1 r1 u) | (x1,u1,r1) <- getEta t] ++
+                 [(x2,u2,A'2 t r2) | (x2,u2,r2) <- getEta u]
+getEta (L x t) = [(x,argfn t,V') | isApp t, argapp t == V x ] ++ 
+                 [(x1,u1,L' x r1) | (x1,u1,r1) <- getEta t]
+
+-- stepEta t computes all possible developments of t by one eta-redex
+stepEta :: ULT -> [ULT]
+stepEta t = do
+  (x,t,c) <- getEta t
+  return $ plug c t
+
+-- normalize t computes the eta-normal form of t.
+normalizeEta :: ULT -> ULT
+normalizeEta t =
+  let t' = stepEta t in
+  if t' == [] then t else normalizeEta (head t')
+
+-- test for eta equality
+eta :: ULT -> ULT -> Bool
+eta t u = alpha (normalizeEta t) (normalizeEta u)
+
+-- test for beta-eta equality
+betaEta :: ULT -> ULT -> Bool
+betaEta t u = alpha (normalizeEta $ normalize t) (normalizeEta $ normalize u)
 
 {-- TYPE INFERENCE AND CHECKING --}
 
