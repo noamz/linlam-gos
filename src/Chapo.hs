@@ -311,3 +311,7 @@ conj23 :: Int -> Bool
 conj23 n =
   let props = idempotents $ allcNLTnb (n+1) in
   all id [beta (compose i j) (compose j i) | i <- props, j <- props]
+
+-- verified for n<=7
+conj24 :: Int -> Bool
+conj24 n = length (filter (eta (L 0 $ V 0)) $ allnptiRL n) == catalan n
