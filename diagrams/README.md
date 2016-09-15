@@ -98,3 +98,11 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 
 ### Involutions
 ![n<=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/involutions3.svg)
+
+### Tamari lattice
+#### n=2
+![n=2](https://rawgit.com/noamz/linlam-gos/master/diagrams/tam2.svg)
+#### n=3
+![n=3](https://rawgit.com/noamz/linlam-gos/master/diagrams/tam3.svg)
+#### n=4
+![n=4](https://rawgit.com/noamz/linlam-gos/master/diagrams/tam4.svg)
