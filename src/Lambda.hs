@@ -16,8 +16,9 @@ import Bijections
 import qualified Catalan as C
 
 -- type of raw linear lambda terms
-data ULT = V Int | A ULT ULT | L Int ULT
+data ULTp v = V v | A (ULTp v) (ULTp v) | L v (ULTp v)
   deriving (Eq,Show)
+type ULT = ULTp Int
 -- type of linear lambda terms with explicit context
 type ULTc = ([Int],ULT)
 
@@ -572,16 +573,28 @@ fromTNF :: TNF -> Type
 fromTNF (TNF [] r) = TVar r
 fromTNF (TNF (a:as) r) = TFn (fromTNF a) (fromTNF (TNF as r))
 
+-- structural properties of lambda terms
+
 -- compute underlying tree of applications, erasing lambdas
 eraseLambdas :: ULT -> ULT
 eraseLambdas (A t u) = A (eraseLambdas t) (eraseLambdas u)
 eraseLambdas (V x) = (V x)
 eraseLambdas (L x t) = eraseLambdas t
 
--- compute lambda skeleton, turning lambdas into binary nodes with one
--- trivial child (the right child if b is false, left child otherwise)
-lambdaSkel :: Bool -> ULT -> C.Tree
-lambdaSkel b (V _) = C.L
-lambdaSkel b (A t u) = C.B (lambdaSkel b t) (lambdaSkel b u)
-lambdaSkel b (L _ t) = if b then C.B C.L (lambdaSkel b t)
-                       else C.B (lambdaSkel b t) C.L
+-- a "lambda skeleton" is a unary-binary tree, which represents the
+-- underlying structure of lambdas and applications in a term but
+-- ignores the matching structure between lambdas and variables.
+
+lambdaSkel :: ULT -> ULTp ()
+lambdaSkel (V _) = V ()
+lambdaSkel (A t u) = A (lambdaSkel t) (lambdaSkel u)
+lambdaSkel (L _ t) = L () (lambdaSkel t)
+
+-- turn a lambda skeleton into a binary tree, where lambda nodes
+-- are turned into a binary node with trivial right child if b is false
+-- and trivial left child if b is true
+skel2tree :: Bool -> ULTp () -> C.Tree
+skel2tree b (V ()) = C.L
+skel2tree b (A t u) = C.B (skel2tree b t) (skel2tree b u)
+skel2tree b (L () t) = if b then C.B C.L (skel2tree b t)
+                       else C.B (skel2tree b t) C.L
