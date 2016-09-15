@@ -585,10 +585,10 @@ eraseLambdas (L x t) = eraseLambdas t
 -- underlying structure of lambdas and applications in a term but
 -- ignores the matching structure between lambdas and variables.
 
-lambdaSkel :: ULT -> ULTp ()
-lambdaSkel (V _) = V ()
-lambdaSkel (A t u) = A (lambdaSkel t) (lambdaSkel u)
-lambdaSkel (L _ t) = L () (lambdaSkel t)
+ult2skel :: ULT -> ULTp ()
+ult2skel (V _) = V ()
+ult2skel (A t u) = A (ult2skel t) (ult2skel u)
+ult2skel (L _ t) = L () (ult2skel t)
 
 -- turn a lambda skeleton into a binary tree, where lambda nodes
 -- are turned into a binary node with trivial right child if b is false
@@ -598,3 +598,33 @@ skel2tree b (V ()) = C.L
 skel2tree b (A t u) = C.B (skel2tree b t) (skel2tree b u)
 skel2tree b (L () t) = if b then C.B C.L (skel2tree b t)
                        else C.B (skel2tree b t) C.L
+
+-- given a lambda skeleton, recover the unique planar lambda term with
+-- that underlying skeleton, according to either the RL or LR planarity
+-- convention (flag b).
+skel2ULT_st :: Bool -> ULTp () -> State (Int,[Int]) ULT
+skel2ULT_st b (V ()) = do
+  (n,(x:g)) <- get
+  () <- put (n,g)
+  return $ V x
+skel2ULT_st False (A t u) = do
+  u' <- skel2ULT_st False u
+  t' <- skel2ULT_st False t
+  return $ A t' u'
+skel2ULT_st True (A t u) = do
+  t' <- skel2ULT_st False t
+  u' <- skel2ULT_st False u
+  return $ A t' u'
+skel2ULT_st b (L () t) = do
+  (n,g) <- get
+  let x = n
+  () <- put (n+1,x:g)
+  t' <- skel2ULT_st b t
+  return $ L x t'
+
+skel2ULT :: Bool -> [Int] -> ULTp () -> ULT
+skel2ULT b g t =
+  let n = foldr max 0 g in
+  case runState (skel2ULT_st b t) (n,g) of
+    (t',(_,[])) -> t'
+    (t',(_,_:_)) -> error "not all variables consumed!"
