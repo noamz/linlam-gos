@@ -612,8 +612,8 @@ skel2ULT_st False (A t u) = do
   t' <- skel2ULT_st False t
   return $ A t' u'
 skel2ULT_st True (A t u) = do
-  t' <- skel2ULT_st False t
-  u' <- skel2ULT_st False u
+  t' <- skel2ULT_st True t
+  u' <- skel2ULT_st True u
   return $ A t' u'
 skel2ULT_st b (L () t) = do
   (n,g) <- get
@@ -628,3 +628,9 @@ skel2ULT b g t =
   case runState (skel2ULT_st b t) (n,g) of
     (t',(_,[])) -> t'
     (t',(_,_:_)) -> error "not all variables consumed!"
+
+rl2lr :: ULT -> ULT
+rl2lr t = skel2ULT True (freevars t) $ ult2skel t
+
+lr2rl :: ULT -> ULT
+lr2rl t = skel2ULT False (freevars t) $ ult2skel t
