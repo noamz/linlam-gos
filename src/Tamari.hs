@@ -52,4 +52,29 @@ prop1 :: Int -> Bool
 prop1 n =
   flip all (tamari n) $ \(t1,t2) ->
   length (tree2spine t1) >= length (tree2spine t2)
-  
+
+-- sequent-style decision procedure for Tamari order
+tamari_seq :: [Tree] -> Tree -> Tree -> Bool
+tamari_seq g (B t1 t2) u = tamari_seq (t2:g) t1 u
+tamari_seq g L L = g == []
+tamari_seq g L (B u1 u2) =
+  let k = leaves u1 in
+  let grab k g acc =
+        if k == 0 then Just (acc,g)
+        else if g == [] then Nothing
+        else
+          let (t:g') = g in
+          let i = leaves t in
+          if i > k then Nothing
+          else grab (k - i) g' (t:acc) in
+  case grab (k-1) g [] of
+    Nothing -> False
+    Just (g1,t2:g2) -> tamari_seq (reverse g1) L u1 && tamari_seq g2 t2 u2
+
+-- claim: tamari_seq agrees with tamari_order
+-- verified for n<=6
+prop2 :: Int -> Bool
+prop2 n =
+  flip all (binary_trees n) $ \t1 ->
+  flip all (binary_trees n) $ \t2 ->
+  tamari_order t1 t2 == tamari_seq [] t1 t2
