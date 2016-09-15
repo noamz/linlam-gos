@@ -285,6 +285,13 @@ conj18 n = length (idempotents $ allnptiRL n) == catalan n
 conj19 :: Int -> Bool
 conj19 n = sort (map apps2tree $ idempotents $ allnptiRL n) == sort (C.binary_trees n)
 
+-- verified for n<=7
+conj19' :: Int -> Bool
+conj19' n =
+  let toLR t = fromJust $ find (\t' -> lambdaSkel False t == lambdaSkel False t') (allnptiLR n) in
+  all (\t -> apps2tree t == C.rightleaf (C.arcs2tree (lams2arcsLR $ toLR t))) (idempotents $ allnptiRL n)
+  
+
 -- false at n==4
 conj20 :: Int -> Bool
 conj20 n =
