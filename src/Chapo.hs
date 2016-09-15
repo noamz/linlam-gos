@@ -288,7 +288,7 @@ conj19 n = sort (map apps2tree $ idempotents $ allnptiRL n) == sort (C.binary_tr
 -- verified for n<=7
 conj19' :: Int -> Bool
 conj19' n =
-  let toLR t = fromJust $ find (\t' -> lambdaSkel t == lambdaSkel t') (allnptiLR n) in
+  let toLR t = fromJust $ find (\t' -> ult2skel t == ult2skel t') (allnptiLR n) in
   all (\t -> apps2tree t == C.rightleaf (C.arcs2tree (lams2arcsLR $ toLR t))) (idempotents $ allnptiRL n)
   
 
