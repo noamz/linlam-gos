@@ -604,8 +604,10 @@ skel2tree b (L () t) = if b then C.B C.L (skel2tree b t)
 -- convention (flag b).
 skel2ULT_st :: Bool -> ULTp () -> State (Int,[Int]) ULT
 skel2ULT_st b (V ()) = do
-  (n,(x:g)) <- get
-  () <- put (n,g)
+  (n,g) <- get
+  if g == [] then error "skel2ULT_st: context empty at variable occurrence" else do
+  let (x:g') = g
+  () <- put (n,g')
   return $ V x
 skel2ULT_st False (A t u) = do
   u' <- skel2ULT_st False u
