@@ -78,3 +78,30 @@ prop2 n =
   flip all (binary_trees n) $ \t1 ->
   flip all (binary_trees n) $ \t2 ->
   tamari_order t1 t2 == tamari_seq [] t1 t2
+
+-- focused sequent calculus
+tamari_linv :: Tree -> [Tree] -> Tree -> Bool
+tamari_neu :: [Tree] -> Tree -> Bool
+tamari_linv (B t1 t2) g u = tamari_linv t1 (t2:g) u
+tamari_linv L g u = tamari_neu g u
+tamari_neu g L = g == []
+tamari_neu g (B u1 u2) =
+  let k = leaves u1 in
+  let grab k g acc =
+        if k == 0 then Just (acc,g)
+        else if g == [] then Nothing
+        else
+          let (t:g') = g in
+          let i = leaves t in
+          if i > k then Nothing
+          else grab (k - i) g' (t:acc) in
+  case grab (k-1) g [] of
+    Nothing -> False
+    Just (g1,t2:g2) -> tamari_neu (reverse g1) u1 && tamari_linv t2 g2 u2
+
+-- verified for n<=7
+prop3 :: Int -> Bool
+prop3 n =
+  flip all (binary_trees n) $ \t1 ->
+  flip all (binary_trees n) $ \t2 ->
+  tamari_linv t1 [] t2 == tamari_seq [] t1 t2
