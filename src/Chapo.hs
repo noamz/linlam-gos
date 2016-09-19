@@ -322,3 +322,26 @@ conj23 n =
 -- verified for n<=7
 conj24 :: Int -> Bool
 conj24 n = length (filter (eta (L 0 $ V 0)) $ allnptiRL n) == catalan n
+
+-- sequent-style decision procedure for Tamari order
+tamari_seq' :: [C.Tree] -> C.Tree -> C.Tree -> Maybe (ULTp ())
+tamari_seq' g (C.B t1 t2) u = do
+  e <- tamari_seq' (t2:g) t1 u
+  return $ L () e
+tamari_seq' g C.L C.L = if g == [] then return $ V () else Nothing
+tamari_seq' g C.L (C.B u1 u2) =
+  let k = C.leaves u1 in
+  let grab k g acc =
+        if k == 0 then Just (acc,g)
+        else if g == [] then Nothing
+        else
+          let (t:g') = g in
+          let i = C.leaves t in
+          if i > k then Nothing
+          else grab (k - i) g' (t:acc) in
+  case grab (k-1) g [] of
+    Nothing -> Nothing
+    Just (g1,t2:g2) -> do
+      e1 <- tamari_seq' (reverse g1) C.L u1
+      e2 <- tamari_seq' g2 t2 u2
+      return $ A e1 e2
