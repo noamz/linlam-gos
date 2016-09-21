@@ -27,15 +27,20 @@ binary_trees :: Int -> [Tree]
 binary_trees 0 = [L]
 binary_trees n = [B t1 t2 | i <- [0..n-1], t1 <- binary_trees i, t2 <- binary_trees (n-1-i)]
 
-arcs2tree_cps :: Int -> Arcs -> (Arcs -> Tree -> r) -> r
-arcs2tree_cps x (D y:w) k = if x == y then k w L else error "not a planar arc diagram"
-arcs2tree_cps x (U y:w) k = arcs2tree_cps y w $ \w' t1 -> arcs2tree_cps x w' $ \w'' t2 -> k w'' (B t1 t2)
-arcs2tree_cps x [] k = error "not a closed arc diagram"
+arcs2tree_cps :: Int -> Arcs -> (String -> r) -> (Arcs -> Tree -> r) -> r
+arcs2tree_cps x (D y:w) fail k = if x == y then k w L else fail "not a planar arc diagram"
+arcs2tree_cps x (U y:w) fail k = arcs2tree_cps y w fail $ \w' t1 -> arcs2tree_cps x w' fail $ \w'' t2 -> k w'' (B t1 t2)
+arcs2tree_cps x [] fail k = fail "not a closed arc diagram"
 
 arcs2tree :: Arcs -> Tree
 arcs2tree [] = L
-arcs2tree (U x:xs) = arcs2tree_cps x xs (\w' t -> B t (arcs2tree w'))
+arcs2tree (U x:xs) = arcs2tree_cps x xs (\s -> error s) (\w' t -> B t (arcs2tree w'))
 arcs2tree (D x:xs) = error "not a closed arc diagram"
+
+isDyck :: Arcs -> Bool
+isDyck [] = True
+isDyck (U x:xs) = arcs2tree_cps x xs (\_ -> False) (\_ _ -> True)
+isDyck (D _:_) = False
 
 tree2arcs_st :: Tree -> Int -> (Int,Arcs)
 tree2arcs_st L n = (n,[])
