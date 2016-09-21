@@ -32,6 +32,11 @@ lams2arcs b (V x) = [C.D x]
 lams2arcsLR = lams2arcs True
 lams2arcsRL = lams2arcs False
 
+isPlanarLR :: ULT -> Bool
+isPlanarLR t = C.isDyck (lams2arcsLR t)
+isPlanarRL :: ULT -> Bool
+isPlanarRL t = C.isDyck (lams2arcsRL t)
+
 -- given a double-occurrence word representing its binding structure,
 -- and a binary tree representing its applicative structure, attempt
 -- to reconstruct a normal linear term
@@ -345,3 +350,10 @@ tamari_seq' g C.L (C.B u1 u2) =
       e1 <- tamari_seq' (reverse g1) C.L u1
       e2 <- tamari_seq' g2 t2 u2
       return $ A e1 e2
+
+-- verified for n<=5
+conj25 :: Int -> Bool
+conj25 n =
+  let ts = filter isPlanarLR $ allcULTnb (toInteger $ 2*n+1) in
+  let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2arcsLR t,apps2tree t)) ts in
+  flip all intervals (\(c1,c2) -> T.tamari_seq [] c1 c2)
