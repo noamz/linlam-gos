@@ -285,8 +285,10 @@ permToInvol p =
   f ++ map (\(i,j) -> (j,i)) f
 
 -- standardize a sequence of distinct integers
-stdize :: [Int] -> Perm
+stdize :: [Int] -> [Int]
 stdize w =
   let n = length w in
-  let w' = sortBy (\(x,i) (y,j) -> compare x y) (zip w [0..n-1]) in
-  zip (map snd w') [0..n-1]
+  let w' = sortBy (\(x,i) (y,j) -> compare x y) (zip w [1..n]) in
+  let p = zip (map snd w') [1..n] in
+  map (act p) [1..n]
+
