@@ -277,3 +277,16 @@ equivClassesBy eq (a:as) acc =
     insert :: (a -> a -> Bool) -> a -> [[a]] -> [[a]]
     insert eq a [] = [[a]]
     insert eq a ((b:bs):as) = if eq a b then (a:b:bs):as else (b:bs) : insert eq a as
+
+-- turn a permutation into a fixed-point free involution on twice as many elements
+permToInvol :: Perm -> Perm
+permToInvol p =
+  let f = [(2*i,2*j+1) | (i,j) <- p] in
+  f ++ map (\(i,j) -> (j,i)) f
+
+-- standardize a sequence of distinct integers
+stdize :: [Int] -> Perm
+stdize w =
+  let n = length w in
+  let w' = sortBy (\(x,i) (y,j) -> compare x y) (zip w [0..n-1]) in
+  zip (map snd w') [0..n-1]
