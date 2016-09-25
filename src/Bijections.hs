@@ -292,3 +292,7 @@ stdize w =
   let p = zip (map snd w') [1..n] in
   map (act p) [1..n]
 
+-- interpret a standard sequence as a permutation
+stdToPerm :: [Int] -> Perm
+stdToPerm w = zip [1..length w] w
+
