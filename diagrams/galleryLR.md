@@ -36,6 +36,14 @@ Normal terms are indexed by number of neutral-normal switches (n), and grouped i
 ### n=4+1
 ![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiLR4.svg)
 
+## indecomposable normal LR-planar terms (with types)
+### n=2+1
+![n=2+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiLRtypes2.svg)
+### n=3+1
+![n=3+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiLRtypes3.svg)
+### n=4+1
+![n=4+1](https://rawgit.com/noamz/linlam-gos/master/diagrams/nptiLRtypes4.svg)
+
 ## normal linear terms
 
 ### n=1+1
