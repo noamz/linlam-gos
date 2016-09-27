@@ -76,22 +76,22 @@ typeTree k (L.TFn t1 t2) =
    # (connectOutside' (with & arrowHead .~ noHead) k k2 # lwL 0.1),
    s1 ++ s2)
 
-posTree :: String -> L.Type -> (Diagram B, [String])
-negTree :: String -> L.Type -> (Diagram B, [String])
-posTree k (L.TVar _) = (spot # named k, [k])
-posTree k (L.TFn t1 t2) =
-  let (d1,s1) = posTree ('L' : k) t2 in
-  let (d2,s2) = negTree ('R' : k) t1 in
+posTree :: Bool -> String -> L.Type -> (Diagram B, [String])
+negTree :: Bool -> String -> L.Type -> (Diagram B, [String])
+posTree b k (L.TVar _) = (spot # named k, [k])
+posTree b k (L.TFn t1 t2) =
+  let (d1,s1) = if b then negTree b ('L' : k) t1 else posTree b ('L' : k) t2 in
+  let (d2,s2) = if b then posTree b ('R' : k) t2 else negTree b ('R' : k) t1 in
   let k1 = ('L' : k) in
   let k2 = ('R' : k) in
   (attach False k1 k2 k (d1 ||| d2)
    # (connectOutside' (with & arrowHead .~ noHead) k k1 # lwL 0.1)
    # (connectOutside' (with & arrowHead .~ noHead) k k2 # lwL 0.1),
    s1 ++ s2)
-negTree k (L.TVar _) = (spot # named k, [k])
-negTree k (L.TFn t1 t2) =
-  let (d1,s1) = posTree ('L' : k) t1 in
-  let (d2,s2) = negTree ('R' : k) t2 in
+negTree b k (L.TVar _) = (spot # named k, [k])
+negTree b k (L.TFn t1 t2) =
+  let (d1,s1) = posTree b ('L' : k) t1 in
+  let (d2,s2) = negTree b ('R' : k) t2 in
   let k1 = ('L' : k) in
   let k2 = ('R' : k) in
   (attach True k1 k2 k (d1 ||| d2)
@@ -101,16 +101,12 @@ negTree k (L.TFn t1 t2) =
 
 diagPos :: L.Type -> Diagram B
 diagPos t =
-  let (d,ns) = posTree [] t in
+  let (d,ns) = posTree False [] t in
   let w = C.dow2arcs (L.linearizePos t) in
   VC.diagArcs_glue ns w d
 
 diagType :: Bool -> L.Type -> Diagram B
-diagType False t =
-  let (d,ns) = posTree [] t in
-  let w = C.dow2arcs (L.linearizePos t) in
-  VC.diagArcs_glue ns w d
-diagType True t =
-  let (d,ns) = typeTree [] t in
-  let w = C.dow2arcs (L.linearizeType t) in
+diagType b t =
+  let (d,ns) = posTree b [] t in
+  let w = C.dow2arcs (if b then L.linearizeType t else L.linearizePos t) in
   VC.diagArcs_glue ns w d
