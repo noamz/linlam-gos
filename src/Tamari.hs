@@ -2,6 +2,7 @@ module Tamari where
 
 import Data.List
 import Catalan
+import Bijections
 
 rotR1 :: Tree -> [Tree]
 rotR1 (B (t1 @ (B t11 t12)) t2) =
@@ -70,6 +71,7 @@ tamari_seq g L (B u1 u2) =
   case grab (k-1) g [] of
     Nothing -> False
     Just (g1,t2:g2) -> tamari_seq (reverse g1) L u1 && tamari_seq g2 t2 u2
+    Just (g1,[]) -> False
 
 -- claim: tamari_seq agrees with tamari_order
 -- verified for n<=6
@@ -98,6 +100,7 @@ tamari_neu g (B u1 u2) =
   case grab (k-1) g [] of
     Nothing -> False
     Just (g1,t2:g2) -> tamari_neu (reverse g1) u1 && tamari_linv t2 g2 u2
+    Just (g1,[]) -> False
 
 -- verified for n<=7
 prop3 :: Int -> Bool
