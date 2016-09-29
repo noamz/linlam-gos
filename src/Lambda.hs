@@ -136,143 +136,108 @@ printULT t = putStr (prettyULT t ++ "\n")
 printULTc :: ULTc -> IO ()
 printULTc gt = putStr (prettyULTc gt ++ "\n")
 
--- generate all linear lambda terms in a given context of free
--- variables env, with n lambdas/apps. This runs in the State monad in
--- order to generate fresh variable names.
-genULT :: [Int] -> Integer -> StateT Int [] ULT
-genULT [x] 0 = return (V x)
-genULT _ 0 = mzero
-genULT env n = genA env n `mplus` genL env n
+-- generate linear lambda terms in a given context of free variables env,
+-- with n lambdas/apps. The procedure takes as a parameter a function "sp"
+-- which returns all allowable splittings of the context.
+-- This runs in the State monad in order to generate fresh variable names.
+genULTp :: ([Int] -> [([Int],[Int])]) -> [Int] -> Integer -> StateT Int [] ULT
+genULTp sp [x] 0 = return (V x)
+genULTp sp _ 0 = mzero
+genULTp sp env n = genA env n `mplus` genL env n
  where
    genA :: [Int] -> Integer -> StateT Int [] ULT
    genA env n = do
-     (env1,env2) <- lift (split env)
+     (env1,env2) <- lift (sp env)
      i <- lift [0..n-1]
-     t <- genULT env1 i
-     u <- genULT env2 (n-i-1)
+     t <- genULTp sp env1 i
+     u <- genULTp sp env2 (n-i-1)
      return (A t u)
    genL :: [Int] -> Integer -> StateT Int [] ULT
    genL env n = do
      x <- freshInt
-     t <- genULT (x:env) (n-1)
+     t <- genULTp sp (x:env) (n-1)
      return (L x t)
 
--- generate closed terms
+-- all closed linear lambda terms
 allcULT :: Integer -> [ULT]
-allcULT n = map fst $ runStateT (genULT [] n) 0
+allcULT n = map fst $ runStateT (genULTp split [] n) 0
+    
 
--- generate terms with one free variable
+-- all linear lambda terms with one free variable
 allvULT :: Int -> Integer -> [ULT]
-allvULT x n = map fst $ runStateT (genULT [x] n) (x+1)
+allvULT x n = map fst $ runStateT (genULTp split [x] n) (x+1)
 
--- generate indecomposable terms (i.e., with no closed subterms)
-genULTnb :: [Int] -> Integer -> StateT Int [] ULT
-genULTnb [x] 0 = return (V x)
-genULTnb _ 0 = mzero
-genULTnb env n = genAnb env n `mplus` genLnb env n
- where
-   genAnb :: [Int] -> Integer -> StateT Int [] ULT
-   genAnb env n = do
-     (env1,env2) <- lift (split env)
-     if env1 == [] || env2 == [] then mzero else do
-     i <- lift [0..n-1]
-     t <- genULTnb env1 i
-     u <- genULTnb env2 (n-i-1)
-     return (A t u)
-   genLnb :: [Int] -> Integer -> StateT Int [] ULT
-   genLnb env n = do
-     x <- freshInt
-     t <- genULTnb (x:env) (n-1)
-     return (L x t)
-
--- generate closed indecomposable terms
+-- all closed indecomposable terms
 allcULTnb :: Integer -> [ULT]
-allcULTnb n = map fst $ runStateT (genULTnb [] n) 0
+allcULTnb n = map fst $ runStateT (genULTp sp [] n) 0
+  where
+    sp = filter (\(g1,g2) -> g1 /= [] && g2 /= []) . split
 
--- directly generate neutral and normal terms
-genNeutral :: [Int] -> Integer -> StateT Int [] ULT
-genNormal  :: [Int] -> Integer -> StateT Int [] ULT
-genNeutral [x] 0 = return (V x)
-genNeutral _ 0 = mzero
-genNeutral env n = do
-  (env1,env2) <- lift (split env)
+-- directly generate neutral and normal terms. These take as parameters
+-- both a splitting function and a merging function on contexts.
+genNeutralp :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
+genNormalp  :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
+genNeutralp sp mg [x] 0 = return (V x)
+genNeutralp sp mg _ 0 = mzero
+genNeutralp sp mg env n = do
+  (env1,env2) <- lift (sp env)
   i <- lift [0..n-1]
-  t <- genNeutral env1 i
-  u <- genNormal env2 (n-i)
+  t <- genNeutralp sp mg env1 i
+  u <- genNormalp sp mg env2 (n-i)
   return (A t u)
-genNormal env n = do
+genNormalp sp mg env n = do
   k <- lift [0..n-toInteger(length env)]
   xs <- freshInts k
-  t <- genNeutral (env ++ xs) (n-1)
+  env' <- lift (mg xs env)
+  t <- genNeutralp sp mg env' (n-1)
   return $ foldr L t xs
 
+-- all normal linear terms
 allcNLT :: Int -> [ULT]
-allcNLT n = [t | t <- map fst $ runStateT (genNormal [] (toInteger n)) 0]
+allcNLT n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+  where
+    sp = split
+    mg g1 g2 = [g1 ++ g2]
 
+-- all neutral linear terms
 allNeutral :: Int -> [ULTc]
-allNeutral n = [([0..k-1],t) | k <- [0..n+1], t <- map fst $ runStateT (genNeutral [0..k-1] (toInteger n)) k]
+allNeutral n = [([0..k-1],t) | k <- [0..n+1], t <- map fst $ runStateT (genNeutralp sp mg [0..k-1] (toInteger n)) k]
+  where
+    sp = split
+    mg g1 g2 = [g1 ++ g2]
 
--- directly generate neutral and normal indecomposable terms
-genNeutralnb :: [Int] -> Integer -> StateT Int [] ULT
-genNormalnb  :: [Int] -> Integer -> StateT Int [] ULT
-genNeutralnb [x] 0 = return (V x)
-genNeutralnb _ 0 = mzero
-genNeutralnb env n = do
-  (env1,env2) <- lift (split env)
-  if env2 == [] then mzero else do
-  i <- lift [0..n-1]
-  t <- genNeutralnb env1 i
-  u <- genNormalnb env2 (n-i)
-  return (A t u)
-genNormalnb env n = do
-  k <- lift [0..n-toInteger(length env)]
-  xs <- freshInts k
-  t <- genNeutralnb (env ++ xs) (n-1)
-  return $ foldr L t xs
-
+-- all normal indecomposable terms
 allcNLTnb :: Int -> [ULT]
-allcNLTnb n = [t | t <- map fst $ runStateT (genNormalnb [] (toInteger n)) 0]
+allcNLTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+  where
+    sp = filter (\(g1,g2) -> g2 /= []) . split
+    mg g1 g2 = [g1 ++ g2]
 
--- directly generate neutral and normal ordered terms (turn on bit for LR)
-genNeutralO :: Bool -> [Int] -> Integer -> StateT Int [] ULT
-genNormalO  :: Bool -> [Int] -> Integer -> StateT Int [] ULT
-genNeutralO lr [x] 0 = return (V x)
-genNeutralO lr _ 0 = mzero
-genNeutralO lr env n = do
-  (env1,env2) <- lift ([splitAt i env | i <- [0..length env]])
-  i <- lift [0..n-1]
-  t <- genNeutralO lr env1 i
-  u <- genNormalO lr env2 (n-i)
-  return (A t u)
-genNormalO lr env n = do
-  k <- lift [0..n-toInteger(length env)]
-  xs <- freshInts k
-  t <- genNeutralO lr (if lr then reverse xs ++ env else env ++ xs) (n-1)
-  return $ foldr L t xs
-
+-- all normal ordered terms (turn on bit for LR)
 allcNPT :: Bool -> Int -> [ULT]
-allcNPT lr n = [t | t <- map fst $ runStateT (genNormalO lr [] (toInteger n)) 0]
-
--- directly generate neutral and normal indecomposable ordered terms (turn on bit for LR)
-genNeutralOnb :: Bool -> [Int] -> Integer -> StateT Int [] ULT
-genNormalOnb  :: Bool -> [Int] -> Integer -> StateT Int [] ULT
-genNeutralOnb lr [x] 0 = return (V x)
-genNeutralOnb lr _ 0 = mzero
-genNeutralOnb lr env n = do
-  (env1,env2) <- lift ([splitAt i env | i <- [0..length env]])
-  if env2 == [] then mzero else do
-  i <- lift [0..n-1]
-  t <- genNeutralOnb lr env1 i
-  u <- genNormalOnb lr env2 (n-i)
-  return (A t u)
-genNormalOnb lr env n = do
-  k <- lift [0..n-toInteger(length env)]
-  xs <- freshInts k
-  t <- genNeutralOnb lr (if lr then reverse xs ++ env else env ++ xs) (n-1)
-  return $ foldr L t xs
-
+allcNPT lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+  where
+    sp g = [splitAt i g | i <- [0..length g]]
+    mg xs g = [if lr then reverse xs ++ g else g ++ xs]
+    
+-- normal indecomposable ordered terms (turn on bit for LR)
 allcNPTnb :: Bool -> Int -> [ULT]
-allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalOnb lr [] (toInteger n)) 0]
+allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+  where
+    sp g = [splitAt i g | i <- [0..length g-1]]
+    mg xs g = [if lr then reverse xs ++ g else g ++ xs]
+
+-- all normal semi-ordered terms
+allcNSOT n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+  where
+    sp g = [splitAt i g | i <- [0..length g]]
+    mg xs env = shuffle xs env
+
+-- all normal indecomposable semi-ordered terms
+allcNSOTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+  where
+    sp g = [splitAt i g | i <- [0..length g-1]]
+    mg = shuffle
 
 unNeutral :: ULT -> [ULT] -> (Int,[ULT])
 unNeutral (V x) args = (x,args)
