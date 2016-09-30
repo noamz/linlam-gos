@@ -21,6 +21,15 @@ splitC :: [a] -> [([a],[a])]
 splitC [] = [([],[])]
 splitC (a:as) = ([],a:as) : [(a:l,r) | (l,r) <- splitC as]
 
+-- generate all n-1 possible splittings of a list of length n into
+-- two contiguous non-empty pieces
+-- satisfies: splitCN g == [splitAt i g | i <- [1..length g-1]]
+splitCN :: [a] -> [([a],[a])]
+splitCN [] = []
+splitCN [a] = []
+splitCN [a,b] = [([a],[b])]
+splitCN (a1:a2:as) = ([a1],a2:as) : ([a1,a2],as) : [(a1:a2:l,r) | (l,r) <- splitCN as]
+
 -- generate all n ways of removing an element from a list of length n
 remove :: [a] -> [(a,[a])]
 remove [] = []
