@@ -357,3 +357,35 @@ conj25 n =
   let ts = filter isPlanarLR $ allcULTnb (toInteger $ 2*n+1) in
   let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2arcsLR t,apps2tree t)) ts in
   flip all intervals (\(c1,c2) -> T.tamari_seq [] c1 c2)
+
+termint :: ULT -> (C.Tree,C.Tree)
+termint t = (C.rightleaf $ C.arcs2tree $ lams2arcsLR t,apps2tree t)
+
+vartps :: ULT -> TCtx
+vartps t =
+  let (_,t') = unlambdas t in
+  let (_,_,g,_) = synth t' in
+  g
+
+termsig :: ULT -> [Int]
+termsig t =
+  map length $ map (\(x,tp) -> linearizeType tp) (vartps t)
+
+conj26 :: Int -> [((C.Tree,C.Tree),[Int])]
+conj26 n =
+  let ts = allnptiLR n in
+  zip (map termint ts) (map termsig ts)
+
+conj27 :: Int -> [[Int]]
+conj27 n =
+  flip map (T.tamari n) $ \(t1,t2) ->
+  map (uncurry (+)) $
+  zip (map (C.ldepth . reverse) (C.paths t1)) (map (C.ldepth . reverse) (C.paths t2))
+
+-- Some more observations/conjectures:
+-- [length $ nub $ map lams2arcsLR $ allcNPT True n | n <- [1..]] == [1,2,5,14,42,132,429,...] == A000108 (offset 1)
+-- [length $ nub $ map lams2arcsLR $ allcNPTnb True n | n <- [1..]] == [1,1,2,5,14,42,132,...] == A000108 (offset 0)
+-- [length $ nub $ map lams2arcsLR $ allcNLT n | n <- [1..]] == [1,3,15,105,945,...] == A001147 (offset 1)
+-- [length $ nub $ map lams2arcsLR $ allcNLTnb n | n <- [1..]] == [1,2,10,74,706,...] == A000698 (offset 0)
+-- [length $ nub $ map lams2arcsLR $ allcNLTex n | n <- [1..]] == [1,2,6,24,120,720,...] == A000142 (offset 1)
+-- [length $ nub $ map lams2arcsLR $ allcNLTexnb n | n <- [1..]] == [1,1,3,13,71,461,...] == A003319 (offset 0)
