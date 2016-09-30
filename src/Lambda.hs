@@ -229,28 +229,28 @@ allcNLTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 
 allcNPT :: Bool -> Int -> [ULT]
 allcNPT lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
-    sp g = [splitAt i g | i <- [0..length g]]
+    sp = splitC
     mg xs g = [if lr then reverse xs ++ g else g ++ xs]
     
 -- normal indecomposable ordered terms (turn on bit for LR)
 allcNPTnb :: Bool -> Int -> [ULT]
 allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
-    sp g = [splitAt i g | i <- [0..length g-1]]
+    sp = splitCN
     mg xs g = [if lr then reverse xs ++ g else g ++ xs]
 
 -- representatives for all equivalence classes of normal linear terms modulo
 -- free exchange of lambdas.
 allcNLTex n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
-    sp g = [splitAt i g | i <- [0..length g]]
+    sp = splitC
     mg xs env = shuffle xs env
 
 -- representatives for all equivalence classes of normal linear indecomposable
 -- terms modulo free exchange of lambdas.
 allcNLTexnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
-    sp g = [splitAt i g | i <- [0..length g-1]]
+    sp = splitCN
     mg = shuffle
 
 -- more decomposition routines
