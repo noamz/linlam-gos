@@ -14,6 +14,13 @@ split (a:as) = do
   (l,r) <- split as
   return (a:l,r) ++ return (l,a:r)
 
+-- generate all n+1 possible splittings of a list of length n into
+-- two contiguous pieces
+-- satisfies: splitC g == [splitAt i g | i <- [0..length g]]
+splitC :: [a] -> [([a],[a])]
+splitC [] = [([],[])]
+splitC (a:as) = ([],a:as) : [(a:l,r) | (l,r) <- splitC as]
+
 -- generate all n ways of removing an element from a list of length n
 remove :: [a] -> [(a,[a])]
 remove [] = []
