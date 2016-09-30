@@ -139,44 +139,59 @@ printULTc gt = putStr (prettyULTc gt ++ "\n")
 -- Here we define various procedures for generating different families
 -- of linear lambda terms.
 
--- "genULTp sp env n"
-genULTp :: ([Int] -> [([Int],[Int])]) -> [Int] -> Integer -> StateT Int [] ULT
+-- "genULTp sp ins env n"
+genULTp :: ([Int] -> [([Int],[Int])]) -> (Int -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
 -- Generates linear lambda terms in a given context of free variables env,
 -- with n lambdas/apps. The parameter "sp" is a function which returns all
--- allowable splittings of the context, and can be varied, for example, to
--- generate planar terms or indecomposable terms.
+-- allowable splittings of the context, while the parameter "ins" is a
+-- function which returns all ways of extending a context by a variable.
+-- These can be varied, for example, to generate planar terms or
+-- indecomposable terms.
 -- This procedure runs in the State monad in order to generate fresh
 -- variable names.
-genULTp sp [x] 0 = return (V x)
-genULTp sp _ 0 = mzero
-genULTp sp env n = genA env n `mplus` genL env n
+genULTp sp ins [x] 0 = return (V x)
+genULTp sp ins _ 0 = mzero
+genULTp sp ins env n = genA env n `mplus` genL env n
  where
    genA :: [Int] -> Integer -> StateT Int [] ULT
    genA env n = do
      (env1,env2) <- lift (sp env)
      i <- lift [0..n-1]
-     t <- genULTp sp env1 i
-     u <- genULTp sp env2 (n-i-1)
+     t <- genULTp sp ins env1 i
+     u <- genULTp sp ins env2 (n-i-1)
      return (A t u)
    genL :: [Int] -> Integer -> StateT Int [] ULT
    genL env n = do
      x <- freshInt
-     t <- genULTp sp (x:env) (n-1)
+     env' <- lift (ins x env)
+     t <- genULTp sp ins env' (n-1)
      return (L x t)
 
 -- all closed linear lambda terms
 allcULT :: Integer -> [ULT]
-allcULT n = map fst $ runStateT (genULTp split [] n) 0
+allcULT n = map fst $ runStateT (genULTp split (\x g -> [x:g]) [] n) 0
 
 -- all linear lambda terms with one free variable
 allvULT :: Int -> Integer -> [ULT]
-allvULT x n = map fst $ runStateT (genULTp split [x] n) (x+1)
+allvULT x n = map fst $ runStateT (genULTp split (\x g -> [x:g]) [x] n) (x+1)
 
 -- all closed indecomposable terms
 allcULTnb :: Integer -> [ULT]
-allcULTnb n = map fst $ runStateT (genULTp sp [] n) 0
+allcULTnb n = map fst $ runStateT (genULTp sp (\x g -> [x:g]) [] n) 0
   where
     sp = filter (\(g1,g2) -> g1 /= [] && g2 /= []) . split
+
+-- all closed planar lambda terms (turn on bit for LR-planarity)
+allcUPT :: Bool -> Integer -> [ULT]
+allcUPT lr n = map fst $ runStateT (genULTp splitC ins [] n) 0
+  where
+    ins = if lr then (\x g -> [x:g]) else (\x g -> [g ++ [x]])
+                                     
+-- all closed planar indecomposable lambda terms (turn on bit for LR-planarity)
+allcUPTnb :: Bool -> Integer -> [ULT]
+allcUPTnb lr n = map fst $ runStateT (genULTp splitCN ins [] n) 0
+  where
+    ins = if lr then (\x g -> [x:g]) else (\x g -> [g ++ [x]])
 
 -- "genNeutralp sp mg env n"
 -- "genNormalp sp mg env n"
@@ -225,14 +240,14 @@ allcNLTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 
     sp = filter (\(g1,g2) -> g2 /= []) . split
     mg g1 g2 = [g1 ++ g2]
 
--- all normal ordered terms (turn on bit for LR-planarity)
+-- all normal planar terms (turn on bit for LR-planarity)
 allcNPT :: Bool -> Int -> [ULT]
 allcNPT lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
     sp = splitC
     mg xs g = [if lr then reverse xs ++ g else g ++ xs]
     
--- normal indecomposable ordered terms (turn on bit for LR)
+-- normal indecomposable planar terms (turn on bit for LR)
 allcNPTnb :: Bool -> Int -> [ULT]
 allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
