@@ -140,7 +140,7 @@ printULTc gt = putStr (prettyULTc gt ++ "\n")
 -- of linear lambda terms.
 
 -- "genULTp sp ins env n"
-genULTp :: ([Int] -> [([Int],[Int])]) -> (Int -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
+genULTp :: ([Int] -> [([Int],[Int])]) -> (Int -> [Int] -> [[Int]]) -> [Int] -> Int -> StateT Int [] ULT
 -- Generates linear lambda terms in a given context of free variables env,
 -- with n lambdas/apps. The parameter "sp" is a function which returns all
 -- allowable splittings of the context, while the parameter "ins" is a
@@ -153,14 +153,14 @@ genULTp sp ins [x] 0 = return (V x)
 genULTp sp ins _ 0 = mzero
 genULTp sp ins env n = genA env n `mplus` genL env n
  where
-   genA :: [Int] -> Integer -> StateT Int [] ULT
+   genA :: [Int] -> Int -> StateT Int [] ULT
    genA env n = do
      (env1,env2) <- lift (sp env)
      i <- lift [0..n-1]
      t <- genULTp sp ins env1 i
      u <- genULTp sp ins env2 (n-i-1)
      return (A t u)
-   genL :: [Int] -> Integer -> StateT Int [] ULT
+   genL :: [Int] -> Int -> StateT Int [] ULT
    genL env n = do
      x <- freshInt
      env' <- lift (ins x env)
@@ -168,35 +168,35 @@ genULTp sp ins env n = genA env n `mplus` genL env n
      return (L x t)
 
 -- all closed linear lambda terms
-allcULT :: Integer -> [ULT]
+allcULT :: Int -> [ULT]
 allcULT n = map fst $ runStateT (genULTp split (\x g -> [x:g]) [] n) 0
 
 -- all linear lambda terms with one free variable
-allvULT :: Int -> Integer -> [ULT]
+allvULT :: Int -> Int -> [ULT]
 allvULT x n = map fst $ runStateT (genULTp split (\x g -> [x:g]) [x] n) (x+1)
 
 -- all closed indecomposable terms
-allcULTnb :: Integer -> [ULT]
+allcULTnb :: Int -> [ULT]
 allcULTnb n = map fst $ runStateT (genULTp sp (\x g -> [x:g]) [] n) 0
   where
     sp = filter (\(g1,g2) -> g1 /= [] && g2 /= []) . split
 
 -- all closed planar lambda terms (turn on bit for LR-planarity)
-allcUPT :: Bool -> Integer -> [ULT]
+allcUPT :: Bool -> Int -> [ULT]
 allcUPT lr n = map fst $ runStateT (genULTp splitC ins [] n) 0
   where
     ins = if lr then (\x g -> [x:g]) else (\x g -> [g ++ [x]])
                                      
 -- all closed planar indecomposable lambda terms (turn on bit for LR-planarity)
-allcUPTnb :: Bool -> Integer -> [ULT]
+allcUPTnb :: Bool -> Int -> [ULT]
 allcUPTnb lr n = map fst $ runStateT (genULTp splitCN ins [] n) 0
   where
     ins = if lr then (\x g -> [x:g]) else (\x g -> [g ++ [x]])
 
 -- "genNeutralp sp mg env n"
 -- "genNormalp sp mg env n"
-genNeutralp :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
-genNormalp  :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
+genNeutralp :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Int -> StateT Int [] ULT
+genNormalp  :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Int -> StateT Int [] ULT
 -- These procedures directly generate neutral and normal terms in a given
 -- context env, with n neutral-normal phase changes. The parameter "sp" is
 -- a function which returns all allowable splittings of the context, while
@@ -213,7 +213,7 @@ genNeutralp sp mg env n = do
   u <- genNormalp sp mg env2 (n-i)
   return (A t u)
 genNormalp sp mg env n = do
-  k <- lift [0..n-toInteger(length env)]
+  k <- lift [0..n-length env]
   xs <- freshInts k
   env' <- lift (mg xs env)
   t <- genNeutralp sp mg env' (n-1)
@@ -221,49 +221,49 @@ genNormalp sp mg env n = do
 
 -- all normal linear terms
 allcNLT :: Int -> [ULT]
-allcNLT n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+allcNLT n = [t | t <- map fst $ runStateT (genNormalp sp mg [] n) 0]
   where
     sp = split
     mg g1 g2 = [g1 ++ g2]
 
 -- all neutral linear terms
 allNeutral :: Int -> [ULTc]
-allNeutral n = [([0..k-1],t) | k <- [0..n+1], t <- map fst $ runStateT (genNeutralp sp mg [0..k-1] (toInteger n)) k]
+allNeutral n = [([0..k-1],t) | k <- [0..n+1], t <- map fst $ runStateT (genNeutralp sp mg [0..k-1] n) k]
   where
     sp = split
     mg g1 g2 = [g1 ++ g2]
 
 -- all normal indecomposable terms
 allcNLTnb :: Int -> [ULT]
-allcNLTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+allcNLTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] n) 0]
   where
     sp = filter (\(g1,g2) -> g2 /= []) . split
     mg g1 g2 = [g1 ++ g2]
 
 -- all normal planar terms (turn on bit for LR-planarity)
 allcNPT :: Bool -> Int -> [ULT]
-allcNPT lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+allcNPT lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] n) 0]
   where
     sp = splitC
     mg xs g = [if lr then reverse xs ++ g else g ++ xs]
     
 -- normal indecomposable planar terms (turn on bit for LR)
 allcNPTnb :: Bool -> Int -> [ULT]
-allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] n) 0]
   where
     sp = splitCN
     mg xs g = [if lr then reverse xs ++ g else g ++ xs]
 
 -- representatives for all equivalence classes of normal linear terms modulo
 -- free exchange of lambdas.
-allcNLTex n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+allcNLTex n = [t | t <- map fst $ runStateT (genNormalp sp mg [] n) 0]
   where
     sp = splitC
     mg xs env = shuffle xs env
 
 -- representatives for all equivalence classes of normal linear indecomposable
 -- terms modulo free exchange of lambdas.
-allcNLTexnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+allcNLTexnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] n) 0]
   where
     sp = splitCN
     mg = shuffle

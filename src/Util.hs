@@ -11,7 +11,7 @@ freshInt = do
   () <- put (x+1)
   return x
 
-freshInts :: Monad m => Integer -> StateT Int m [Int]
+freshInts :: Monad m => Int -> StateT Int m [Int]
 freshInts 0 = return []
 freshInts k = do
   x <- freshInt

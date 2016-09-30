@@ -92,18 +92,18 @@ eulerULT :: ULT -> Int
 eulerULT t = let (m,_,_) = toRTM' t in M.eulerOM m
 
 -- all closed linear lambda terms, indexed by n, paired with their characteristic
-allTerms :: [(Integer,[(ULT,Int)])]
+allTerms :: [(Int,[(ULT,Int)])]
 allTerms = [(n, [(t,eulerULT t) | t <- allcULT (2*n+1)]) | n <- [0..]]
 
 -- all closed indecomposable linear lambda terms, indexed by n, paired with their characteristic
-allNBTerms :: [(Integer,[(ULT,Int)])]
+allNBTerms :: [(Int,[(ULT,Int)])]
 allNBTerms = [(n, [(t,eulerULT t) | t <- allcULTnb (2*n+1)]) | n <- [0..]]
 
 -- all closed indecomposable planar terms
 allPlaInd :: [ULT]
 allPlaInd = [t | n <- [0..], t <- allcULTnb (2*n+1), eulerULT t == 2]
 
-allNormalPlaInd :: [(Integer,[ULT])]
+allNormalPlaInd :: [(Int,[ULT])]
 allNormalPlaInd = [(n, [t | t <- allcULTnb (2*n+1), eulerULT t == 2, isNormal t]) | n <- [0..]]
 
 
@@ -113,15 +113,15 @@ a000260 = [length [t | t <- allcULTnb (2*n+1), isNormal t, isPlanar t] | n <- [0
 a000309 = [length [t | t <- allcULTnb (2*n+1), isPlanar t] | n <- [0..]]
 --- a000309 = [1,1,4,24,176,...]
 
-printTerms :: [(Integer,[(ULT,Int)])] -> IO ()
+printTerms :: [(Int,[(ULT,Int)])] -> IO ()
 printTerms ts = do
   mapM (\ (n,l) -> putStr ("n=" ++ show n ++ ":\n") >> mapM (\ (t,_) -> printULT t) l) ts
   return ()
 
-flattenTerms :: [(Integer,[(ULT,Int)])] -> [ULT]
+flattenTerms :: [(Int,[(ULT,Int)])] -> [ULT]
 flattenTerms ts = concatMap (\ (_, l) -> map fst l) ts
 
-byChi :: Int -> [(Integer,[(ULT,Int)])] -> [(Integer,[(ULT,Int)])]
+byChi :: Int -> [(Int,[(ULT,Int)])] -> [(Int,[(ULT,Int)])]
 byChi chi = map (\ (n,l) -> (n, filter (\ (t,c) -> c == chi) l))
 
 byGenus g = byChi (2 - 2*g)

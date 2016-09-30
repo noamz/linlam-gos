@@ -177,7 +177,7 @@ conj7 n =
 -- verified for n<=4
 conj8 :: Int -> Bool
 conj8 n =
-  let ts = allcULT (toInteger $ 2*n+1) in
+  let ts = allcULT (2*n+1) in
   let pairs = map (\t -> (C.normalizeArcs $ lams2arcsLR t,apps2tree t)) ts in
   n == 0 || length (nub pairs) < length pairs
 
@@ -354,7 +354,7 @@ tamari_seq' g C.L (C.B u1 u2) =
 -- verified for n<=5
 conj25 :: Int -> Bool
 conj25 n =
-  let ts = filter isPlanarLR $ allcULTnb (toInteger $ 2*n+1) in
+  let ts = filter isPlanarLR $ allcULTnb (2*n+1) in
   let intervals = map (\t -> (C.rightleaf $ C.arcs2tree $ lams2arcsLR t,apps2tree t)) ts in
   flip all intervals (\(c1,c2) -> T.tamari_seq [] c1 c2)
 
