@@ -136,11 +136,17 @@ printULT t = putStr (prettyULT t ++ "\n")
 printULTc :: ULTc -> IO ()
 printULTc gt = putStr (prettyULTc gt ++ "\n")
 
--- generate linear lambda terms in a given context of free variables env,
--- with n lambdas/apps. The procedure takes as a parameter a function "sp"
--- which returns all allowable splittings of the context.
--- This runs in the State monad in order to generate fresh variable names.
+-- Here we define various procedures for generating different families
+-- of linear lambda terms.
+
+-- "genULTp sp env n"
 genULTp :: ([Int] -> [([Int],[Int])]) -> [Int] -> Integer -> StateT Int [] ULT
+-- Generates linear lambda terms in a given context of free variables env,
+-- with n lambdas/apps. The parameter "sp" is a function which returns all
+-- allowable splittings of the context, and can be varied, for example, to
+-- generate planar terms or indecomposable terms.
+-- This procedure runs in the State monad in order to generate fresh
+-- variable names.
 genULTp sp [x] 0 = return (V x)
 genULTp sp _ 0 = mzero
 genULTp sp env n = genA env n `mplus` genL env n
@@ -161,7 +167,6 @@ genULTp sp env n = genA env n `mplus` genL env n
 -- all closed linear lambda terms
 allcULT :: Integer -> [ULT]
 allcULT n = map fst $ runStateT (genULTp split [] n) 0
-    
 
 -- all linear lambda terms with one free variable
 allvULT :: Int -> Integer -> [ULT]
@@ -173,10 +178,17 @@ allcULTnb n = map fst $ runStateT (genULTp sp [] n) 0
   where
     sp = filter (\(g1,g2) -> g1 /= [] && g2 /= []) . split
 
--- directly generate neutral and normal terms. These take as parameters
--- both a splitting function and a merging function on contexts.
+-- "genNeutralp sp mg env n"
+-- "genNormalp sp mg env n"
 genNeutralp :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
 genNormalp  :: ([Int] -> [([Int],[Int])]) -> ([Int] -> [Int] -> [[Int]]) -> [Int] -> Integer -> StateT Int [] ULT
+-- These procedures directly generate neutral and normal terms in a given
+-- context env, with n neutral-normal phase changes. The parameter "sp" is
+-- a function which returns all allowable splittings of the context, while
+-- the parameter "mg" is a function which returns all ways of merging two
+-- contexts.
+-- These procedures run in the State monad in order to generate fresh
+-- variable names.
 genNeutralp sp mg [x] 0 = return (V x)
 genNeutralp sp mg _ 0 = mzero
 genNeutralp sp mg env n = do
@@ -213,7 +225,7 @@ allcNLTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 
     sp = filter (\(g1,g2) -> g2 /= []) . split
     mg g1 g2 = [g1 ++ g2]
 
--- all normal ordered terms (turn on bit for LR)
+-- all normal ordered terms (turn on bit for LR-planarity)
 allcNPT :: Bool -> Int -> [ULT]
 allcNPT lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
@@ -227,17 +239,21 @@ allcNPTnb lr n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n
     sp g = [splitAt i g | i <- [0..length g-1]]
     mg xs g = [if lr then reverse xs ++ g else g ++ xs]
 
--- all normal semi-ordered terms
-allcNSOT n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+-- representatives for all equivalence classes of normal linear terms modulo
+-- free exchange of lambdas.
+allcNLTex n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
     sp g = [splitAt i g | i <- [0..length g]]
     mg xs env = shuffle xs env
 
--- all normal indecomposable semi-ordered terms
-allcNSOTnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
+-- representatives for all equivalence classes of normal linear indecomposable
+-- terms modulo free exchange of lambdas.
+allcNLTexnb n = [t | t <- map fst $ runStateT (genNormalp sp mg [] (toInteger n)) 0]
   where
     sp g = [splitAt i g | i <- [0..length g-1]]
     mg = shuffle
+
+-- more decomposition routines
 
 unNeutral :: ULT -> [ULT] -> (Int,[ULT])
 unNeutral (V x) args = (x,args)
