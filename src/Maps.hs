@@ -391,3 +391,14 @@ petersenOM =
     }
 
 
+-- test if the edge corresponding to a dart is a bridge
+isBridge :: OMap -> Int -> Bool
+isBridge m d =
+  let d' = act (alpha m) d in
+  let alpha' = [(x,y) | x <- odarts m, let y = if x == d then d else if x == d' then d' else act (alpha m) x] in
+  not $ elem d' (transClosure [sigma m, alpha'] [d])
+
+-- test if a map is bridgeless
+isBridgeless :: OMap -> Bool
+isBridgeless m = not $ any (isBridge m) (odarts m)
+
