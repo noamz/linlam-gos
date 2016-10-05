@@ -402,3 +402,4 @@ isBridge m d =
 isBridgeless :: OMap -> Bool
 isBridgeless m = not $ any (isBridge m) (odarts m)
 
+-- [length $ filter (isBridgeless . unroot) (map snd $ genROM_tutte' n) | n <- [1..]] == [1,1,4,27,248,2830,38232,...] == A000699
