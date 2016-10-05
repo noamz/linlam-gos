@@ -250,6 +250,13 @@ rootFacesROM m =
   let ds = orbit (act (sigma m)) r \\ [r] in
   equivClassesBy (\d1 d2 -> elem d1 (orbit (act (comp (inv (sigma m)) (alpha m))) d2)) ds []
 
+-- list of vertices incident to root face
+rootVerticesROM :: OMap -> [[Int]]
+rootVerticesROM m =
+  let r = head (odarts m) in
+  let ds = orbit (act (phiOM m)) r \\ [r] in
+  equivClassesBy (\d1 d2 -> elem d1 (orbit (act (sigma m)) d2)) ds []
+
 
 -- map (length . rootDartsROM) (nubBy equivOM $ genROM 1) == [2,3]
 -- map (length . rootEdgesROM) (nubBy equivOM $ genROM 1) == [1,1]
