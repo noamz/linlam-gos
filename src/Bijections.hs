@@ -315,7 +315,7 @@ stdToPerm w = zip [1..length w] w
 -- test whether an involution is indecomposable
 isIndecompInv :: Perm -> Bool
 isIndecompInv p =
-  let edges = map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
   let incident (d1,d1') (d2,d2') =
         (d1 < d2 && d2 < d1') || (d2 < d1 && d1 < d2') in
   let component = gtrans (\e -> filter (incident e) edges) [head edges] [] in
@@ -326,7 +326,7 @@ isIndecompInv p =
 -- test whether an involution is connected
 isConnectedInv :: Perm -> Bool
 isConnectedInv p =
-  let edges = map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
   let crossing (d1,d1') (d2,d2') =
         (d1 < d2 && d2 < d1' && d1' < d2') ||
         (d2 < d1 && d1 < d2' && d2' < d1') in
@@ -334,3 +334,23 @@ isConnectedInv p =
   sort component == sort edges
 
 -- [length $ filter isConnectedInv (involute [1..2*n]) | n <- [1..]] == [1,1,4,27,248,2830,...] == A000699
+
+-- compute (very naively!) the list of terminal chords in the intersection order of a chord diagram
+terminalChords :: Bij -> [(Int,Int)]
+terminalChords p =
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  if length edges == 1 then edges else
+  let root = foldr min (fst (head edges)) (map fst (tail edges)) in
+  let edges' = [(i,j) | (i,j) <- edges, i /= root] in
+  let crossing (d1,d1') (d2,d2') =
+        (d1 < d2 && d2 < d1' && d1' < d2') ||
+        (d2 < d1 && d1 < d2' && d2' < d1') in
+  let component e = gtrans (\e -> filter (crossing e) edges') [e] [] in
+  let components = equivClassesBy (\e e' -> elem e (component e')) edges' [] in
+  concat [terminalChords (es ++ [(j,i) | (i,j) <- es]) | es <- components]
+
+-- [length $ (filter (\t -> length (terminalChords t) == 1) ts) | n <- [1..], let ts = filter isConnectedInv (involute [1..2*n])] == [1,1,3,15,105,...]
+
+-- [length $ (filter (\t -> length (terminalChords t) == 2) ts) | n <- [1..], let ts = filter isConnectedInv (involute [1..2*n])] == [0,0,1,11,116,1344,...]
+
+-- [length $ (filter (\t -> length (terminalChords t) == 3) ts) | n <- [1..], let ts = filter isConnectedInv (involute [1..2*n])] == [0,0,0,1,26,490,...]
