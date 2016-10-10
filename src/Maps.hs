@@ -410,3 +410,43 @@ isBridgeless :: OMap -> Bool
 isBridgeless m = not $ any (isBridge m) (odarts m)
 
 -- [length $ filter (isBridgeless . unroot) (map snd $ genROM_tutte' n) | n <- [1..]] == [1,1,4,27,248,2830,38232,...] == A000699
+
+-- delete a list of darts from a map
+deleteDarts :: OMap -> [Int] -> OMap
+deleteDarts m ds =
+  let odarts' = odarts m \\ ds in
+  let sigma' d = let d' = act (sigma m) d in if elem d' ds then sigma' d' else d' in
+  let alpha' d = let d' = act (alpha m) d in if elem d' ds then alpha' d' else d' in
+  OMap {
+    odarts = odarts',
+    sigma = [(d,sigma' d) | d <- odarts'],
+    alpha = [(d,alpha' d) | d <- odarts']
+    }
+
+-- check that a map is connected
+isConnected :: OMap -> Bool
+isConnected m =
+  if odarts m == [] then True else
+  let r = head (odarts m) in
+  length (transClosure [sigma m, alpha m] [r]) == length (odarts m)
+
+-- WARNING: definitions below are not quite correct
+
+-- test if a map is 2-connected
+is2Connected :: OMap -> Bool
+is2Connected m =
+  let vs = verticesOM m in
+  all (\x -> isConnected (deleteDarts m x)) vs
+
+-- test if a map is 2-edge-connected (== bridgeless)
+is2EdgeConnected :: OMap -> Bool
+is2EdgeConnected m =
+  let es = edgesOM m in
+  all (\x -> isConnected (deleteDarts m x)) es
+
+-- test if a map is 3-connected
+is3Connected :: OMap -> Bool
+is3Connected m =
+  let vs = verticesOM m in
+  all (\(x,y) -> isConnected (deleteDarts m (union x y)))
+  [(x,y) | x <- vs, y <- vs, x /= y]
