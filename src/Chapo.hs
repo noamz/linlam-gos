@@ -3,6 +3,9 @@ module Chapo where
 import Data.List
 import Data.Maybe
 
+import Control.Monad.State
+import Util
+
 import Formulas
 import Bijections
 import Lambda
@@ -10,6 +13,7 @@ import Scott1980
 
 import qualified Catalan as C
 import qualified Tamari as T
+import qualified Maps as M
 
 -- extract a binary tree from a lambda term by looking at its
 -- underlying applicative structure
@@ -328,29 +332,6 @@ conj23 n =
 conj24 :: Int -> Bool
 conj24 n = length (filter (eta (L 0 $ V 0)) $ allnptiRL n) == catalan n
 
--- sequent-style decision procedure for Tamari order
-tamari_seq' :: [C.Tree] -> C.Tree -> C.Tree -> Maybe (ULTp ())
-tamari_seq' g (C.B t1 t2) u = do
-  e <- tamari_seq' (t2:g) t1 u
-  return $ L () e
-tamari_seq' g C.L C.L = if g == [] then return $ V () else Nothing
-tamari_seq' g C.L (C.B u1 u2) =
-  let k = C.leaves u1 in
-  let grab k g acc =
-        if k == 0 then Just (acc,g)
-        else if g == [] then Nothing
-        else
-          let (t:g') = g in
-          let i = C.leaves t in
-          if i > k then Nothing
-          else grab (k - i) g' (t:acc) in
-  case grab (k-1) g [] of
-    Nothing -> Nothing
-    Just (g1,t2:g2) -> do
-      e1 <- tamari_seq' (reverse g1) C.L u1
-      e2 <- tamari_seq' g2 t2 u2
-      return $ A e1 e2
-
 -- verified for n<=5
 conj25 :: Int -> Bool
 conj25 n =
@@ -389,3 +370,60 @@ conj27 n =
 -- [length $ nub $ map lams2arcsLR $ allcNLTnb n | n <- [1..]] == [1,2,10,74,706,...] == A000698 (offset 0)
 -- [length $ nub $ map lams2arcsLR $ allcNLTex n | n <- [1..]] == [1,2,6,24,120,720,...] == A000142 (offset 1)
 -- [length $ nub $ map lams2arcsLR $ allcNLTexnb n | n <- [1..]] == [1,1,3,13,71,461,...] == A003319 (offset 0)
+
+
+tamari_map :: [(Int,C.Tree)] -> (Int,C.Tree) -> C.Tree -> StateT Int Maybe (Int,M.OMap)
+tamari_map g (x,C.B t1 t2) u = do
+  x' <- freshInt
+  y <- freshInt
+  z <- freshInt
+  (r,m) <- tamari_map ((z,t2):g) (y,t1) u
+  return
+    (r,M.OMap { M.odarts = [x,x'] ++ M.odarts m,
+                M.sigma = perm3 x' y z ++ M.sigma m,
+                M.alpha = perm2 x x' ++ M.alpha m })
+tamari_map g (x,C.L) C.L =
+  if g == [] then do
+    return (x,M.OMap { M.odarts = [x], M.sigma = [], M.alpha = [] })
+  else lift Nothing
+tamari_map g (x,C.L) (C.B u1 u2) = 
+  let k = C.leaves u1 in
+  let grab k g acc =
+        if k == 0 then Just (acc,g)
+        else if g == [] then Nothing
+        else
+          let ((x,t):g') = g in
+          let i = C.leaves t in
+          if i > k then Nothing
+          else grab (k - i) g' ((x,t):acc) in
+  case grab (k-1) g [] of
+    Nothing -> lift Nothing
+    Just (g1,(y,t2):g2) -> do
+      (r1,m1) <- tamari_map (reverse g1) (x,C.L) u1
+      (r2,m2) <- tamari_map g2 (y,t2) u2
+      r1' <- freshInt
+      r2' <- freshInt
+      r <- freshInt
+      return (r, M.OMap { M.odarts = [r,r1',r2'] ++ M.odarts m1 ++ M.odarts m2,
+                          M.sigma = perm3 r r2' r1' ++ M.sigma m1 ++ M.sigma m2,
+                          M.alpha = perm2 r1 r1' ++ perm2 r2 r2' ++
+                                    [(i,act (M.alpha m1) i) | i <- M.odarts m1 \\ [r1]] ++
+                                    [(i,act (M.alpha m2) i) | i <- M.odarts m2 \\ [r2]] })
+
+tamari_map' :: [(Int,C.Tree)] -> (Int,C.Tree) -> C.Tree -> Maybe (Int,M.OMap)
+tamari_map' g (x,t) u =
+  let i = 1 + foldr (\(y,t) x -> max y x) x g in
+  maybe Nothing (Just . fst) $ runStateT (tamari_map g (x,t) u) i
+
+tamari_map'' :: C.Tree -> C.Tree -> Maybe M.OMap
+tamari_map'' t u =
+  let c = do
+        (r,m) <- tamari_map [] (0,t) u
+        d1 <- freshInt
+        return $ M.OMap { M.odarts = [d1] ++ M.odarts m,
+                          M.sigma =
+                            [(i,act (M.sigma m) i) | i <- M.odarts m \\ [0]] ++ perm2 0 d1,
+                          M.alpha =
+                            [(i,act (M.sigma m) i) | i <- M.odarts m \\ [r]] ++ perm2 d1 r } in
+  maybe Nothing (Just . fst) $ runStateT c 1
+
