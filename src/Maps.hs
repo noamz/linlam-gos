@@ -411,6 +411,13 @@ isBridgeless m = not $ any (isBridge m) (odarts m)
 
 -- [length $ filter (isBridgeless . unroot) (map snd $ genROM_tutte' n) | n <- [1..]] == [1,1,4,27,248,2830,38232,...] == A000699
 
+-- check that a map is connected
+isConnected :: OMap -> Bool
+isConnected m =
+  if odarts m == [] then True else -- we count the empty map as connected
+  let r = head (odarts m) in
+  length (transClosure [sigma m, alpha m] [r]) == length (odarts m)
+
 -- delete a list of darts from a map
 deleteDarts :: OMap -> [Int] -> OMap
 deleteDarts m ds =
@@ -423,30 +430,37 @@ deleteDarts m ds =
     alpha = [(d,alpha' d) | d <- odarts']
     }
 
--- check that a map is connected
-isConnected :: OMap -> Bool
-isConnected m =
-  if odarts m == [] then True else
-  let r = head (odarts m) in
-  length (transClosure [sigma m, alpha m] [r]) == length (odarts m)
+-- detach (but don't delete) the darts incident to a vertex
+breakVertex :: OMap -> [Int] -> OMap
+breakVertex m v =
+  OMap {
+    odarts = odarts m,
+    sigma = [(d,d') | d <- odarts m, let d' = if elem d v then d else act (sigma m) d],
+    alpha = alpha m
+    }
+  
+-- detach (but don't delete) the darts incident to an edge
+breakEdge :: OMap -> [Int] -> OMap
+breakEdge m e =
+  OMap {
+    odarts = odarts m,
+    sigma = sigma m,
+    alpha = [(d,d') | d <- odarts m, let d' = if elem d e then d else act (alpha m) d]
+    }
 
--- WARNING: definitions below are not quite correct
-
--- test if a map is 2-connected
-is2Connected :: OMap -> Bool
-is2Connected m =
+-- test if a map is k-vertex-connected
+isKVConnected :: Int -> OMap -> Bool
+isKVConnected 1 m = isConnected m
+isKVConnected k m = 
   let vs = verticesOM m in
-  all (\x -> isConnected (deleteDarts m x)) vs
+  length vs > k &&
+  all (\x -> isKVConnected (k-1) (breakVertex m x)) vs
 
--- test if a map is 2-edge-connected (== bridgeless)
-is2EdgeConnected :: OMap -> Bool
-is2EdgeConnected m =
+-- test if a map is k-edge-connected
+isKEConnected :: Int -> OMap -> Bool
+isKEConnected 1 m = isConnected m
+isKEConnected k m = 
   let es = edgesOM m in
-  all (\x -> isConnected (deleteDarts m x)) es
+  length es > 2 &&
+  all (\x -> isKEConnected (k-1) (breakEdge m x)) es
 
--- test if a map is 3-connected
-is3Connected :: OMap -> Bool
-is3Connected m =
-  let vs = verticesOM m in
-  all (\(x,y) -> isConnected (deleteDarts m (union x y)))
-  [(x,y) | x <- vs, y <- vs, x /= y]
