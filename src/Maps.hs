@@ -405,9 +405,19 @@ isBridge m d =
   let alpha' = [(x,y) | x <- odarts m, let y = if x == d then d else if x == d' then d' else act (alpha m) x] in
   not $ elem d' (transClosure [sigma m, alpha'] [d])
 
+-- test if the edge corresponding to a dart is a loop
+isLoop :: OMap -> Int -> Bool
+isLoop m d =
+  let d' = act (alpha m) d in
+  d /= d' && elem d' (orbit (act (sigma m)) d)
+
 -- test if a map is bridgeless
 isBridgeless :: OMap -> Bool
 isBridgeless m = not $ any (isBridge m) (odarts m)
+
+-- test if a map is loopless
+isLoopless :: OMap -> Bool
+isLoopless m = not $ any (isLoop m) (odarts m)
 
 -- [length $ filter (isBridgeless . unroot) (map snd $ genROM_tutte' n) | n <- [1..]] == [1,1,4,27,248,2830,38232,...] == A000699
 
