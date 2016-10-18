@@ -374,16 +374,18 @@ conj27 n =
 
 tamari_map :: [(Int,C.Tree)] -> (Int,C.Tree) -> C.Tree -> StateT Int Maybe (Int,M.OMap)
 tamari_map g (x,C.B t1 t2) u = do
-  x' <- freshInt
   y <- freshInt
   z <- freshInt
-  (r,m) <- tamari_map ((z,t2):g) (y,t1) u
+  y' <- freshInt
+  z' <- freshInt
+  (r,m) <- tamari_map ((z',t2):g) (y',t1) u
   return
-    (r,M.OMap { M.odarts = [x,x'] ++ M.odarts m,
-                M.sigma = perm3 x' y z ++ M.sigma m,
-                M.alpha = perm2 x x' ++ M.alpha m })
+    (r,M.OMap { M.odarts = [x,y,z] ++ M.odarts m,
+                M.sigma = perm3 x y z ++ M.sigma m,
+                M.alpha = perm2 y y' ++ perm2 z z' ++ M.alpha m })
 tamari_map g (x,C.L) C.L =
   if g == [] then do
+--    x' <- freshInt
     return (x,M.OMap { M.odarts = [x], M.sigma = [], M.alpha = [] })
   else lift Nothing
 tamari_map g (x,C.L) (C.B u1 u2) = 
@@ -401,14 +403,11 @@ tamari_map g (x,C.L) (C.B u1 u2) =
     Just (g1,(y,t2):g2) -> do
       (r1,m1) <- tamari_map (reverse g1) (x,C.L) u1
       (r2,m2) <- tamari_map g2 (y,t2) u2
-      r1' <- freshInt
-      r2' <- freshInt
       r <- freshInt
-      return (r, M.OMap { M.odarts = [r,r1',r2'] ++ M.odarts m1 ++ M.odarts m2,
-                          M.sigma = perm3 r r2' r1' ++ M.sigma m1 ++ M.sigma m2,
-                          M.alpha = perm2 r1 r1' ++ perm2 r2 r2' ++
-                                    [(i,act (M.alpha m1) i) | i <- M.odarts m1 \\ [r1]] ++
-                                    [(i,act (M.alpha m2) i) | i <- M.odarts m2 \\ [r2]] })
+      r' <- freshInt
+      return (r', M.OMap { M.odarts = [r,r'] ++ M.odarts m1 ++ M.odarts m2,
+                          M.sigma = perm3 r r2 r1 ++ M.sigma m1 ++ M.sigma m2,
+                          M.alpha = perm2 r r' ++ M.alpha m1 ++ M.alpha m2})
 
 tamari_map' :: [(Int,C.Tree)] -> (Int,C.Tree) -> C.Tree -> Maybe (Int,M.OMap)
 tamari_map' g (x,t) u =
@@ -417,13 +416,15 @@ tamari_map' g (x,t) u =
 
 tamari_map'' :: C.Tree -> C.Tree -> Maybe M.OMap
 tamari_map'' t u =
+  let x = 0 in
   let c = do
-        (r,m) <- tamari_map [] (0,t) u
-        d1 <- freshInt
-        return $ M.OMap { M.odarts = [d1] ++ M.odarts m,
-                          M.sigma =
-                            [(i,act (M.sigma m) i) | i <- M.odarts m \\ [0]] ++ perm2 0 d1,
-                          M.alpha =
-                            [(i,act (M.sigma m) i) | i <- M.odarts m \\ [r]] ++ perm2 d1 r } in
-  maybe Nothing (Just . fst) $ runStateT c 1
+        (r,m) <- tamari_map [] (x,t) u
+        let r' = act (M.alpha m) r
+        return $ M.OMap { M.odarts = M.odarts m \\ [r],
+                          M.sigma = M.sigma m,
+                          M.alpha = perm2 x r' ++ [(i,act (M.alpha m) i) | i <- M.odarts m \\ [x,r,r']] } in
+  maybe Nothing (Just . fst) $ runStateT c (x + 1)
+
+-- M.isKEConnected 3 $ fromJust $ tamari_map'' (C.B (C.B C.L C.L) C.L) (C.B C.L (C.B C.L C.L)) == True
+-- M.isKEConnected 3 $ fromJust $ tamari_map'' (C.B (C.B C.L C.L) C.L) (C.B (C.B C.L C.L) C.L) == False
 
