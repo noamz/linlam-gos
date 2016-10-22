@@ -354,3 +354,25 @@ terminalChords p =
 -- [length $ (filter (\t -> length (terminalChords t) == 2) ts) | n <- [1..], let ts = filter isConnectedInv (involute [1..2*n])] == [0,0,1,11,116,1344,...]
 
 -- [length $ (filter (\t -> length (terminalChords t) == 3) ts) | n <- [1..], let ts = filter isConnectedInv (involute [1..2*n])] == [0,0,0,1,26,490,...]
+
+-- list arcs which cross a given chord in a chord diagram
+arcCrossings :: Bij -> (Int,Int) -> [(Int,Int)]
+arcCrossings p (d,d') =
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  let crossing (d1,d1') (d2,d2') =
+        (d1 < d2 && d2 < d1' && d1' < d2') ||
+        (d2 < d1 && d1 < d2' && d2' < d1') in
+  filter (crossing (min d d',max d d')) edges
+
+has3Crossing :: Bij -> Bool
+has3Crossing p =
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  flip any edges $ \c1 ->
+  flip any (arcCrossings p c1) $ \c2 ->
+  flip any (arcCrossings p c2) $ \c3 ->
+  elem c3 (arcCrossings p c1)
+
+-- [length $ filter (not . has3Crossing) $ filter isConnectedInv (involute [1..2*n]) | n <- [1..]] == [1,1,3,14,82,...]
+-- [length $ filter (not . has3Crossing) $ filter isIndecompInv (involute [1..2*n]) | n <- [1..]] == [1,2,9,55,400,...]
+
+
