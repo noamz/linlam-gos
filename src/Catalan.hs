@@ -133,3 +133,17 @@ lgraft t1 t2 = foldr (\x y -> B y x) t1 (tree2spine t2)
 
 -- rgraft t1 t2 grafts t2 onto the rightmost leaf of t1
 rgraft t1 t2 = dualtree (lgraft (dualtree t2) (dualtree t1))
+
+type TreePath =  [Either () ()]
+  
+paths :: Tree -> [TreePath]
+paths L = [[]]
+paths (B t1 t2) = [Left () : p1 | p1 <- paths t1] ++ [Right () : p2 | p2 <- paths t2]
+
+ldepth :: TreePath -> Int
+ldepth (Left ():p) = 1 + ldepth p
+ldepth _ = 0
+
+rdepth :: TreePath -> Int
+rdepth (Right ():p) = 1 + rdepth p
+rdepth _ = 0
