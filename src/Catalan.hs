@@ -93,6 +93,15 @@ inv2arcs :: [(Int,Int)] -> Arcs
 inv2arcs f = map (\i -> let j = act f i in if i < j then U i else D j)
              (sort $ dom f)
 
+-- generate an involution from an arc diagram
+arcs2inv :: Arcs -> [(Int,Int)]
+arcs2inv p =
+  let n = length p in
+  let act i = case p !! i of
+        U x -> fromJust (findIndex (== D x) p)
+        D x -> fromJust (findIndex (== U x) p) in
+  [(i,act i) | i <- [0..n-1]]
+
 -- dualize a tree by swapping left and right children
 
 dualtree :: Tree -> Tree
