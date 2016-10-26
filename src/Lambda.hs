@@ -307,6 +307,17 @@ normal_subnormals t = t : normal_subneutrals t
 normal_subneutrals (A t1 t2) = normal_subneutrals t1 ++ normal_subnormals t2
 normal_subneutrals (V x) = []
 
+-- subnormal subterms (in Jason's terminology) of a normal/neutral term
+
+subnormal_subsubnormals :: ULT -> [ULT]
+subnormal_subnormals :: ULT -> [ULT]
+subnormal_subneutrals :: ULT -> [ULT]
+subnormal_subsubnormals t = t : subnormal_subnormals t
+subnormal_subnormals (L x t1) = subnormal_subnormals t1
+subnormal_subnormals t = subnormal_subneutrals t
+subnormal_subneutrals (A t1 t2) = subnormal_subneutrals t1 ++ subnormal_subsubnormals t2
+subnormal_subneutrals (V x) = []
+
 -- size of a normal/neutral term, measured by number of neutral-normal switches
 
 sizeNormal :: ULT -> Int
