@@ -375,4 +375,21 @@ has3Crossing p =
 -- [length $ filter (not . has3Crossing) $ filter isConnectedInv (involute [1..2*n]) | n <- [1..]] == [1,1,3,14,82,...]
 -- [length $ filter (not . has3Crossing) $ filter isIndecompInv (involute [1..2*n]) | n <- [1..]] == [1,2,9,55,400,...]
 
+-- Karen's forbidden configuration
+hasKYForbidden :: Bij -> Bool
+hasKYForbidden p =
+  let crossing (d1,d1') (d2,d2') =
+        (d1 < d2 && d2 < d1' && d1' < d2') ||
+        (d2 < d1 && d1 < d2' && d2' < d1') in
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  flip any edges $ \c1 ->
+  flip any (arcCrossings p c1) $ \c2 ->
+  let blob = gtrans (\e -> filter (\(d,d') -> d > fst c1 && d > fst c2) $ filter (crossing e) (edges \\ [c1])) [c2] [] in
+  let blob' = gtrans (\e -> filter (\(d,d') -> d > fst c1 && d > fst c2) $ filter (crossing e) (edges \\ [c2])) [c1] [] in
+  intersect blob blob' /= []
 
+-- compute the list of left-to-right maximal chords of a chord diagram
+l2rmaximalChords :: Bij -> [(Int,Int)]
+l2rmaximalChords p =
+  let edges = nub $ map (\ds -> let (d,d') = (head ds,head (tail ds)) in (min d d',max d d')) (permToCycles p) in
+  [(i,j) | (i,j) <- edges, all (\(k,l) -> not (k < i) || l < j) edges]
