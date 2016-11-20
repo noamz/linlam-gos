@@ -5,6 +5,7 @@ import Control.Monad.State
 import Control.Monad.List
 
 import Data.List
+import Data.Maybe
 import qualified Data.Tuple as DT
 
 import Util
@@ -474,3 +475,18 @@ isKEConnected k m =
   length es > 2 &&
   all (\x -> isKEConnected (k-1) (breakEdge m x)) es
 
+-- more surgery routines...
+
+-- contract an edge
+contractEdge :: OMap -> Int -> OMap
+contractEdge m d =
+  let d' = act (alpha m) d in
+  let v1 = orbit (act (sigma m)) d in
+  let v2 = orbit (act (sigma m)) d' in
+  let e = union [d] [d'] in
+  let v = if elem d' v1 then v1 \\ e
+          else (v1 \\ [d]) ++ (v2 \\ [d']) in
+  OMap { odarts = odarts m \\ e,
+         alpha = [(i, act (alpha m) i) | i <- odarts m \\ e],
+         sigma = [(i, act (sigma m) i) | i <- (odarts m \\ e) \\ v]
+                 ++ cyclesToPerm [v] }
