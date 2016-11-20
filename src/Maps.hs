@@ -422,6 +422,8 @@ isLoopless m = not $ any (isLoop m) (odarts m)
 
 -- [length $ filter (isBridgeless . unroot) (map snd $ genROM_tutte' n) | n <- [1..]] == [1,1,4,27,248,2830,38232,...] == A000699
 
+-- [length $ filter (all (\v -> length v `mod` 2 == 0) . verticesOM . unroot) (map snd $ genROM_tutte' n) | n <- [1..]] == [1,1,4,25,208,2146,26368,...] == A005411
+
 -- check that a map is connected
 isConnected :: OMap -> Bool
 isConnected m =
