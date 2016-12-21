@@ -50,6 +50,19 @@ countR (Atm _) = 0
 countR (LImp a b) = countR a + countR b
 countR (RImp a b) = 1 + countR a + countR b
 
+tree2pos :: (Tree,[Int]) -> (Formula,[Int])
+tree2neg :: (Tree,[Int]) -> (Formula,[Int])
+tree2pos (L,x:g) = (Atm x,g)
+tree2pos (B t1 t2, g) =
+  let (a,g') = tree2neg (t1,g) in
+  let (b,g'') = tree2pos (t2,g') in
+  (LImp a b,g'')
+tree2neg (L,x:g) = (Atm x,g)
+tree2neg (B t1 t2, g) =
+  let (a,g') = tree2pos (t1,g) in
+  let (b,g'') = tree2neg (t2,g') in
+  (RImp a b,g'')
+
 lambek_rinv :: [Formula] -> Formula -> Bool
 lambek_neu :: [Formula] -> Int -> Bool
 lambek_lfoc :: [Formula] -> Formula -> [Formula] -> Int -> Bool
@@ -71,5 +84,7 @@ lambek_lfoc g1 (RImp a b) g2 x =
   flip any (splitC g2) $ \(g21,g22) -> lambek_lfoc g1 b g22 x && lambek_rinv g21 a
 
 -- [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), a <- genFormula vars, goodFormula True a, lambek_rinv [] a] | n <- [1..]] == [1,2,9,54,378,...]
+-- == [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,vars), lambek_rinv [] a] | n <- [1..]]
 
 -- [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), a <- genFormula vars, goodFormula True a, lambek_rinv [] a, flip all (subFormula a) (\b -> not (lambek_rinv [] b))] | n <- [1..6]] == [1,1,3,13,...]
+-- == [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,vars), lambek_rinv [] a, flip all (subFormula a) (not . lambek_rinv [])] | n <- [1..]]
