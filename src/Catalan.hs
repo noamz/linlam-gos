@@ -11,10 +11,6 @@ import Bijections
 data Tree = L | B Tree Tree
   deriving (Show,Eq,Ord,Typeable)
 
-data Arc = U Int | D Int
-  deriving (Show,Eq,Ord,Typeable)
-type Arcs = [Arc]
-
 nodes :: Tree -> Int
 nodes L = 0
 nodes (B t1 t2) = 1 + nodes t1 + nodes t2
@@ -26,6 +22,15 @@ leaves (B t1 t2) = leaves t1 + leaves t2
 binary_trees :: Int -> [Tree]
 binary_trees 0 = [L]
 binary_trees n = [B t1 t2 | i <- [0..n-1], t1 <- binary_trees i, t2 <- binary_trees (n-1-i)]
+
+data Arc = U Int | D Int
+  deriving (Show,Eq,Ord,Typeable)
+type Arcs = [Arc]
+
+isup (U _) = True
+isup (D _) = False
+isdown (U _) = False
+isdown (D _) = True
 
 arcs2tree_cps :: Int -> Arcs -> (String -> r) -> (Arcs -> Tree -> r) -> r
 arcs2tree_cps x (D y:w) fail k = if x == y then k w L else fail "not a planar arc diagram"
@@ -147,3 +152,12 @@ ldepth _ = 0
 rdepth :: TreePath -> Int
 rdepth (Right ():p) = 1 + rdepth p
 rdepth _ = 0
+
+-- evaluate a binary tree in left-to-right order, given interpretations for the leaves and
+-- interpretations for the internal nodes as binary operations
+evalLR :: Tree -> ([a],[a -> a -> a]) -> ([a],[a -> a -> a])
+evalLR L (stk,ctl) = (stk,ctl)
+evalLR (B t1 t2) (stk,f:ctl) =
+  let (x:stk',ctl') = evalLR t1 (stk,ctl) in
+  let (y:stk'',ctl'') = evalLR t2 (stk',ctl') in
+  (f x y:stk'',ctl'')
