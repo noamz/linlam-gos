@@ -297,6 +297,16 @@ isDecomposable (L _ t) = isDecomposable t
 
 isIndecomposable t = not (isDecomposable t)
 
+-- neutral subterms of a normal/neutral term
+
+neutral_subnormals :: ULT -> [ULT]
+neutral_subneutrals :: ULT -> [ULT]
+neutral_subnormals (L x t1) = neutral_subnormals t1
+neutral_subnormals t = neutral_subneutrals t
+
+neutral_subneutrals (t@(A t1 t2)) = t : neutral_subneutrals t1 ++ neutral_subnormals t2
+neutral_subneutrals (t@(V x)) = [t]
+
 -- normal subterms of a normal/neutral term
 
 normal_subnormals :: ULT -> [ULT]
