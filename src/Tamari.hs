@@ -1,6 +1,7 @@
 module Tamari where
 
 import Data.List
+import Data.Maybe
 import Catalan
 import Bijections
 
@@ -84,8 +85,7 @@ prop2 n =
 -- focused sequent calculus
 tamari_linv :: Tree -> [Tree] -> Tree -> Bool
 tamari_neu :: [Tree] -> Tree -> Bool
-tamari_linv (B t1 t2) g u = tamari_linv t1 (t2:g) u
-tamari_linv L g u = tamari_neu g u
+tamari_linv t g u = let ts = tree2spine t in tamari_neu (ts ++ g) u
 tamari_neu g L = g == []
 tamari_neu g (B u1 u2) =
   let k = leaves u1 in
@@ -108,3 +108,66 @@ prop3 n =
   flip all (binary_trees n) $ \t1 ->
   flip all (binary_trees n) $ \t2 ->
   tamari_linv t1 [] t2 == tamari_seq [] t1 t2
+
+shuffle_linv :: Tree -> [Tree] -> Tree -> Bool
+shuffle_neu :: [Tree] -> Tree -> Bool
+shuffle_linv t g u =
+  let ts = tree2spine t in
+--  flip any (permutations ts) $ \ts' ->
+  flip any (shuffle ts g) $ \g' ->
+  shuffle_neu g' u
+shuffle_neu g L = g == []
+shuffle_neu g (B u1 u2) =
+  let k = leaves u1 in
+  let grab k g acc =
+        if k == 0 then Just (acc,g)
+        else if g == [] then Nothing
+        else
+          let (t:g') = g in
+          let i = leaves t in
+          if i > k then Nothing
+          else grab (k - i) g' (t:acc) in
+  case grab (k-1) g [] of
+    Nothing -> False
+    Just (g1,g2) ->
+      flip any (remove g2) $ \(t2,g2') ->
+      shuffle_neu (reverse g1) u1 && shuffle_linv t2 g2' u2
+
+-- lattice structure
+tamari_meetc :: [Tree] -> [Tree] -> [Tree]
+tamari_meetc [] [] = []
+tamari_meetc (B t1 t2:g) d = tamari_meetc (t1:t2:g) d
+tamari_meetc g (B t1 t2:d) = tamari_meetc g (t1:t2:d)
+tamari_meetc (L:g) (L:d) =
+  let match = map fst $ fst $ break (uncurry (/=)) (zip g d) in
+  let g' = fromJust $ stripPrefix match g in
+  let d' = fromJust $ stripPrefix match d in
+  L:match ++ tamari_meetc g' d'
+
+-- tamari_join :: Tree -> Tree -> Tree
+-- tamari_join t1 t2 =
+--   if tamari_linv t1 [] t2 then t2 else
+--   if tamari_linv t2 [] t1 then t1 else
+--   let (cur1:g1) = tree2spine t1 in
+--   let (cur2:g2) = tree2spine t2 in
+--   match_and_join g1 g2 (leaves cur1,[cur1]) (leaves cur2,[cur2])
+--   where
+--     match_and_join :: [Tree] -> [Tree] -> (Int,[Tree]) -> (Int,[Tree]) -> Tree
+--     match_and_join g1 g2 (k1,cur1) (k2,cur2) =
+--       if k1 == k2 then
+--         let j = tamari_join (tpsi cur1) (tpsi cur2) in
+--         if g1 == g2 then j else let (t1:g1') = g1 in let (t2:g2') = g2 in B j (match_and_join g1' g2' (leaves t1,[t1]) (leaves t2,[t2]))
+--       else if k1 < k2 then
+--              let (t1:g1') = g1 in
+--              match_and_join g1' g2 (k1+leaves t1,t1:cur1) (k2,cur2)
+--            else
+--              let (t2:g2') = g2 in
+--              match_and_join g1 g2' (k1,cur1) (k2+leaves t2,t2:cur2)
+--     tpsi :: [Tree] -> Tree
+--     tpsi [t] = t
+--     tpsi (t:ts) = foldl B t ts
+                       
+tamari_sig :: Bool -> Tree -> [Bool]
+tamari_sig b L = [b]
+tamari_sig b (B t1 t2) = tamari_sig False t1 ++ tamari_sig True t2
+
