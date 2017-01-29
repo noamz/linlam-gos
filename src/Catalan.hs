@@ -47,6 +47,13 @@ isDyck [] = True
 isDyck (U x:xs) = arcs2tree_cps x xs (\_ -> False) (\_ _ -> True)
 isDyck (D _:_) = False
 
+isClosed :: Arcs -> Bool
+isClosed [] = True
+isClosed (U x:xs) =
+  let (pre,post) = span (/=D x) xs in
+  if null post then False else isClosed (pre ++ tail post)
+isClosed (D x:xs) = False
+
 tree2arcs_st :: Tree -> Int -> (Int,Arcs)
 tree2arcs_st L n = (n,[])
 tree2arcs_st (B t1 t2) n =
