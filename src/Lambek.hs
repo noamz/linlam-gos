@@ -85,6 +85,10 @@ lambek_lfoc g1 (RImp a b) g2 x =
 
 -- [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), a <- genFormula vars, goodFormula True a, lambek_rinv [] a] | n <- [1..]] == [1,2,9,54,378,...]
 -- == [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,vars), lambek_rinv [] a] | n <- [1..]]
+-- == [length $ [a | vars <- map (arcs2dow . inv2arcs) (involute [1..2*n]), t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,vars), lambek_rinv [] a] | n <- [1..]]
+-- == [length $ [a | t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,repeat 0), lambek_rinv [] a] | n <- [1..]]
 
 -- [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), a <- genFormula vars, goodFormula True a, lambek_rinv [] a, flip all (subFormula a) (\b -> not (lambek_rinv [] b))] | n <- [1..6]] == [1,1,3,13,...]
 -- == [length $ [a | vars <- map (arcs2dow . tree2arcs) (binary_trees n), t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,vars), lambek_rinv [] a, flip all (subFormula a) (not . lambek_rinv [])] | n <- [1..]]
+-- == [length $ [a | vars <- map (arcs2dow . inv2arcs) (involute [1..2*n]), t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,vars), lambek_rinv [] a, flip all (subFormula a) (not . lambek_rinv [])] | n <- [1..]]
+-- /= [length $ [a | t <- binary_trees (2*n-1), let (a,_) = tree2pos (t,repeat 0), lambek_rinv [] a, flip all (subFormula a) (not . lambek_rinv [])] | n <- [1..]] == [1,0,0,0,0,...]
