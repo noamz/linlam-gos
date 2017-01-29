@@ -463,19 +463,17 @@ breakEdge m e =
 
 -- test if a map is k-vertex-connected
 isKVConnected :: Int -> OMap -> Bool
-isKVConnected 1 m = isConnected m
-isKVConnected k m = 
-  let vs = verticesOM m in
-  length vs > k &&
-  all (\x -> isKVConnected (k-1) (breakVertex m x)) vs
+isKVConnected 0 m = True
+isKVConnected k m =
+  flip all (choosek (k-1) (verticesOM m)) $ \(vs,_) ->
+  isConnected (foldl deleteDarts m vs)
 
 -- test if a map is k-edge-connected
 isKEConnected :: Int -> OMap -> Bool
-isKEConnected 1 m = isConnected m
-isKEConnected k m = 
-  let es = edgesOM m in
-  length es > 2 &&
-  all (\x -> isKEConnected (k-1) (breakEdge m x)) es
+isKEConnected 0 m = True
+isKEConnected k m =
+  flip all (choosek (k-1) (edgesOM m)) $ \(es,_) ->
+  isConnected (foldl breakEdge m es)
 
 -- more surgery routines...
 
