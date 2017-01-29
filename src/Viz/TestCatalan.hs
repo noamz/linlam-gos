@@ -9,4 +9,4 @@ import Viz.List
 
 main =
   mainWith $
-  vsep 1 $ [hsep 3 $ numberedHList [vsep 1 [diagTree c # scale 2 # centerX, diagArcs (tree2arcs c) # centerX] | c <- binary_trees n] | n <- [1..4]]
+  vsep 1 $ [hsep 3 $ numberedHList [vsep 1 [diagTree black c # scale 2 # centerX, diagArcs (tree2arcs c) # centerX] | c <- binary_trees n] | n <- [1..3]]

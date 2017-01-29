@@ -25,7 +25,7 @@ main = do
   let numbered = reverse $ snd $ foldl (\(n,tnss) ts -> let (m,tns) = foldl (\(m,tns) t -> (m+1,(t,m):tns)) (n,[]) ts in (m, (reverse tns) : tnss)) (1,[]) byApps'
   let numbered' = map (\tns -> (Ch.apps2tree (fst $ head tns),tns)) numbered
   let mkDiagram t = vsep 1 [diagULT b t # centerX, text (Lam.prettyULT t) # centerX ]
-  let d = vsep 1 $ labelledVList [(diagTree c # scale 2,
+  let d = vsep 1 $ labelledVList [(diagTree indianred c # scale 2,
                                    hsep 3 $ labelledHList $ map (\(t,n) -> (mkDiagram t, text (show n))) tns) | (c,tns) <- numbered' ]
 
   mainWith (d # frame 1)
