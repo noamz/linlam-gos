@@ -85,7 +85,7 @@ prop2 n =
 -- focused sequent calculus
 tamari_linv :: Tree -> [Tree] -> Tree -> Bool
 tamari_neu :: [Tree] -> Tree -> Bool
-tamari_linv t g u = let ts = tree2spine t in tamari_neu (ts ++ g) u
+tamari_linv t g u = let ts = tree2spine t in tamari_neu (reverse ts ++ g) u
 tamari_neu g L = g == []
 tamari_neu g (B u1 u2) =
   let k = leaves u1 in
@@ -167,7 +167,9 @@ tamari_meetc (L:g) (L:d) =
 --     tpsi [t] = t
 --     tpsi (t:ts) = foldl B t ts
                        
-tamari_sig :: Bool -> Tree -> [Bool]
-tamari_sig b L = [b]
-tamari_sig b (B t1 t2) = tamari_sig False t1 ++ tamari_sig True t2
-
+tree_type :: Tree -> [Bool]
+tree_type t = pol False t
+  where
+    pol :: Bool -> Tree -> [Bool]
+    pol b L = [b]
+    pol b (B t1 t2) = pol False t1 ++ pol True t2
