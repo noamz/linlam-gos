@@ -490,3 +490,16 @@ contractEdge m d =
          alpha = [(i, act (alpha m) i) | i <- odarts m \\ e],
          sigma = [(i, act (sigma m) i) | i <- (odarts m \\ e) \\ v]
                  ++ cyclesToPerm [v] }
+
+-- perform a depth-first traversal of the darts of a map
+dfsOM :: OMap -> Int -> [Int]
+dfsOM m r = reverse $ dfs' [] (r : (odarts m \\ [r]))
+  where
+    dfs' :: [Int] -> [Int] -> [Int]
+    dfs' visited [] = visited
+    dfs' visited (r:unvisited) =
+      if elem r visited then dfs' visited unvisited else
+      let r' = act (sigma m) r in
+      let r'' = act (alpha m) r' in
+      if elem r' visited then dfs' (r:visited) unvisited else
+      dfs' (union [r'] [r] ++ visited) (r'':unvisited)
