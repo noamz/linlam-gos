@@ -107,3 +107,19 @@ phiinvol p =
 phiinvol' :: Bij -> Bij
 phiinvol' = arcs2inv . phiinvol . inv2arcs
 
+-- decompose an arc diagram into an indecomposable diagram and an arbitrary diagram
+decompArcs :: [Int] -> Arcs -> (Arcs,Arcs)
+decompArcs gamma [] = ([],[])
+decompArcs gamma (U y:w) =
+  let (p,q) = decompArcs (y:gamma) w in
+  (U y:p,q)
+decompArcs gamma (D y:w) =
+  case gamma \\ [y] of
+    [] -> ([D y],w)
+    gamma' ->
+      let (p,q) = decompArcs gamma' w in
+      (D y:p,q)
+
+-- test whether an arc diagram is indecomposable
+isIndecompArcs :: Arcs -> Bool
+isIndecompArcs p = null (snd $ decompArcs [] p)
